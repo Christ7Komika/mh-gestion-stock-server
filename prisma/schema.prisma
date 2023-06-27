@@ -16,10 +16,11 @@ model Client {
   name      String
   company   String
   phone     String?  @unique
-  Email     String?  @unique
+  email     String?  @unique
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
   Ticket    Ticket[]
+  ticketId  String?
 }
 
 model Supplier {
@@ -27,7 +28,7 @@ model Supplier {
   logo      String?
   name      String
   phone     String?     @unique
-  Email     String?     @unique
+  email     String?     @unique
   reference Reference[]
   articles  Article[]
   updatedAt DateTime    @updatedAt
@@ -35,10 +36,11 @@ model Supplier {
 }
 
 model Reference {
-  id          String    @id @default(uuid())
-  reference   Supplier  @relation(fields: [referenceId], references: [id])
-  articles    Article[]
-  referenceId String
+  id         String    @id @default(uuid())
+  name       String
+  articles   Article[]
+  Supplier   Supplier? @relation(fields: [supplierId], references: [id])
+  supplierId String?
 }
 
 model Category {
@@ -118,13 +120,13 @@ model Ticket {
   name            String
   purchaseOrder   String
   status          String
-  client          Client         @relation(fields: [clientId], references: [id])
   articles        Article[]
-  clientId        String
   updatedAt       DateTime       @updatedAt
   createdAt       DateTime       @default(now())
   OutGoingStore   OutGoingStore? @relation(fields: [outGoingStoreId], references: [id])
   outGoingStoreId String?
+  Client          Client?        @relation(fields: [clientId], references: [id])
+  clientId        String?
 }
 
 model History {
