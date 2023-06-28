@@ -1,0 +1,784 @@
+{
+	"info": {
+		"_postman_id": "9ea6618f-ffbc-4b5d-9051-375c0cb7183f",
+		"name": "mh gestion stock",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "client",
+			"item": [
+				{
+					"name": "all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/client",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"client"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "one",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/client/be9ca754-7c8b-4f78-8d4a-c083a8e33dff",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"client",
+								"be9ca754-7c8b-4f78-8d4a-c083a8e33dff"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "logo",
+									"type": "file",
+									"src": "/C:/Users/MAINGER'S HYDRAULIC/Pictures/illustration-woman-online-desktop.843eb114.svg"
+								},
+								{
+									"key": "name",
+									"value": "Christ Komika",
+									"type": "default"
+								},
+								{
+									"key": "company",
+									"value": "MH",
+									"type": "default"
+								},
+								{
+									"key": "phone",
+									"value": "06 554 21 23",
+									"type": "default"
+								},
+								{
+									"key": "email",
+									"value": "christkomika7@gmail.com",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{gestion-stock}}/client",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"client"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "logo",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "name",
+									"value": "Christ Orlando",
+									"type": "default"
+								},
+								{
+									"key": "company",
+									"value": "",
+									"type": "default"
+								},
+								{
+									"key": "phone",
+									"value": "",
+									"type": "default"
+								},
+								{
+									"key": "email",
+									"value": "",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{gestion-stock}}/client/be9ca754-7c8b-4f78-8d4a-c083a8e33dff",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"client",
+								"be9ca754-7c8b-4f78-8d4a-c083a8e33dff"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/client/be9ca754-7c8b-4f78-8d4a-c083a8e33dff",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"client",
+								"be9ca754-7c8b-4f78-8d4a-c083a8e33dff"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "fournisseur",
+			"item": [
+				{
+					"name": "all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/supplier",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"supplier"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "one",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/supplier/c745f35e-ff13-460a-9650-1f444ed8e96f",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"supplier",
+								"c745f35e-ff13-460a-9650-1f444ed8e96f"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "logo",
+									"type": "file",
+									"src": "/C:/Users/MAINGER'S HYDRAULIC/Pictures/1Secretatiat@4x.png"
+								},
+								{
+									"key": "name",
+									"value": "Christ Komika",
+									"type": "default"
+								},
+								{
+									"key": "phone",
+									"value": "06 896 25 13",
+									"type": "default"
+								},
+								{
+									"key": "email",
+									"value": "christkomika7@gmail.com",
+									"type": "default"
+								},
+								{
+									"key": "reference",
+									"value": "QD456FD",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{gestion-stock}}/supplier",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"supplier"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "logo",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "name",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "",
+									"type": "default"
+								},
+								{
+									"key": "email",
+									"value": "",
+									"type": "default"
+								},
+								{
+									"key": "reference",
+									"value": "WGEGFEIBJI",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{gestion-stock}}/supplier/c745f35e-ff13-460a-9650-1f444ed8e96f?logo&name&phone&email&reference",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"supplier",
+								"c745f35e-ff13-460a-9650-1f444ed8e96f"
+							],
+							"query": [
+								{
+									"key": "logo",
+									"value": null
+								},
+								{
+									"key": "name",
+									"value": null
+								},
+								{
+									"key": "phone",
+									"value": null
+								},
+								{
+									"key": "email",
+									"value": null
+								},
+								{
+									"key": "reference",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/supplier/c745f35e-ff13-460a-9650-1f444ed8e96f",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"supplier",
+								"c745f35e-ff13-460a-9650-1f444ed8e96f"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "categorie",
+			"item": [
+				{
+					"name": "all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/category",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"category"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "one",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/category/6a1088bb-98a8-4cb1-9d9e-ede134fda69b",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"category",
+								"6a1088bb-98a8-4cb1-9d9e-ede134fda69b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Inox\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gestion-stock}}/category",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"category"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Plastique\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gestion-stock}}/category/6a1088bb-98a8-4cb1-9d9e-ede134fda69b",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"category",
+								"6a1088bb-98a8-4cb1-9d9e-ede134fda69b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/category/6a1088bb-98a8-4cb1-9d9e-ede134fda69b",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"category",
+								"6a1088bb-98a8-4cb1-9d9e-ede134fda69b"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "entrepot",
+			"item": [
+				{
+					"name": "all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/warehouse",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"warehouse"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "one",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/warehouse/f89fa514-b3b8-4c01-90b5-57853cc9e3f2",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"warehouse",
+								"f89fa514-b3b8-4c01-90b5-57853cc9e3f2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Bureau\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gestion-stock}}/warehouse",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"warehouse"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Reserve\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gestion-stock}}/warehouse/f89fa514-b3b8-4c01-90b5-57853cc9e3f2",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"warehouse",
+								"f89fa514-b3b8-4c01-90b5-57853cc9e3f2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/warehouse/f89fa514-b3b8-4c01-90b5-57853cc9e3f2/Reserve",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"warehouse",
+								"f89fa514-b3b8-4c01-90b5-57853cc9e3f2",
+								"Reserve"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "emplacement",
+			"item": [
+				{
+					"name": "all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/stall",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"stall"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "one",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/stall/c0e354f9-23dc-4e91-8bc7-97c1364d3435",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"stall",
+								"c0e354f9-23dc-4e91-8bc7-97c1364d3435"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Bureau\",\r\n    \"code\": \"GVBN5654NK\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gestion-stock}}/stall",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"stall"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Reserve\",\r\n    \"code\": \"SFJsdsNJLK\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gestion-stock}}/stall/c0e354f9-23dc-4e91-8bc7-97c1364d3435",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"stall",
+								"c0e354f9-23dc-4e91-8bc7-97c1364d3435"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/stall/a933cec7-4ff3-4b7c-a5f7-49c2f392c704/Reserve",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"stall",
+								"a933cec7-4ff3-4b7c-a5f7-49c2f392c704",
+								"Reserve"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "article",
+			"item": [
+				{
+					"name": "all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/articles",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"articles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "one",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/articles/c0e354f9-23dc-4e91-8bc7-97c1364d3435",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"articles",
+								"c0e354f9-23dc-4e91-8bc7-97c1364d3435"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Bureau\",\r\n    \"code\": \"GVBN5654NK\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gestion-stock}}/articles",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"articles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Reserve\",\r\n    \"code\": \"SFJsdsNJLK\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gestion-stock}}/stall/c0e354f9-23dc-4e91-8bc7-97c1364d3435",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"stall",
+								"c0e354f9-23dc-4e91-8bc7-97c1364d3435"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{gestion-stock}}/stall/a933cec7-4ff3-4b7c-a5f7-49c2f392c704/Reserve",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"stall",
+								"a933cec7-4ff3-4b7c-a5f7-49c2f392c704",
+								"Reserve"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
