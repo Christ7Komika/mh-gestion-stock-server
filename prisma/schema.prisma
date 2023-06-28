@@ -52,7 +52,7 @@ model Category {
 model Warehouse {
   id        String         @id @default(uuid())
   group     GroupArticle[]
-  name      String
+  name      String         @unique
   stat      Int
   articles  Article[]
   updatedAt DateTime       @updatedAt()
@@ -66,12 +66,13 @@ model GroupArticle {
 }
 
 model Stall {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   name       String
   code       String?
-  state      Int      @default(0)
-  updatedAt  DateTime @updatedAt
-  creadtedAt DateTime @default(now())
+  article    Article[]
+  state      Int       @default(0)
+  updatedAt  DateTime  @updatedAt
+  creadtedAt DateTime  @default(now())
 }
 
 model Comment {
@@ -79,9 +80,9 @@ model Comment {
   message    String
   updatedAt  DateTime  @updatedAt
   creadtedAt DateTime  @default(now())
+  History    History[]
   Article    Article?  @relation(fields: [articleId], references: [id])
   articleId  String?
-  History    History[]
 }
 
 model Article {
@@ -89,7 +90,7 @@ model Article {
   image             String?
   name              String
   code              String
-  type              String
+  type              String?
   designation       String
   quantity          Int?
   length            Int?
@@ -99,8 +100,8 @@ model Article {
   lotNumber         String
   operatingPressure String?
   diameter          String?
-  Fluid             String?
-  comment           Comment[]
+  fluid             String?
+  Comment           Comment[]
   Reference         Reference?    @relation(fields: [referenceId], references: [id])
   referenceId       String?
   Supplier          Supplier?     @relation(fields: [supplierId], references: [id])
@@ -113,6 +114,8 @@ model Article {
   groupArticleId    String?
   Ticket            Ticket?       @relation(fields: [ticketId], references: [id])
   ticketId          String?
+  Stall             Stall?        @relation(fields: [stallId], references: [id])
+  stallId           String?
 }
 
 model Ticket {
@@ -132,6 +135,7 @@ model Ticket {
 model History {
   id        String   @id @default(uuid())
   state     String
+  type      String
   message   String
   comment   Comment? @relation(fields: [commentId], references: [id])
   updatedAt DateTime @updatedAt
@@ -142,4 +146,12 @@ model History {
 model OutGoingStore {
   id      String   @id @default(uuid())
   tickets Ticket[]
+}
+
+model inComingStore {
+  id          String   @id @default(uuid())
+  articleName String
+  articleId   String
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
 }
