@@ -91,8 +91,7 @@ model Article {
   code              String
   type              String?
   designation       String
-  quantity          Int           @default(0)
-  length            Decimal       @default(0)
+  length            Float         @default(0)
   purchasePrice     String?
   sellingPrice      String?
   unitPrice         String?
@@ -101,6 +100,7 @@ model Article {
   diameter          String?
   fluid             String?
   Comment           Comment?      @relation(fields: [commentId], references: [id])
+  commentId         String?
   Reference         Reference?    @relation(fields: [referenceId], references: [id])
   referenceId       String?
   Supplier          Supplier?     @relation(fields: [supplierId], references: [id])
@@ -115,7 +115,6 @@ model Article {
   ticketId          String?
   Stall             Stall?        @relation(fields: [stallId], references: [id])
   stallId           String?
-  commentId         String?
 }
 
 model Ticket {
@@ -149,9 +148,8 @@ model OutGoingStore {
 }
 
 model inComingStore {
-  id          String   @id @default(uuid())
-  articleName String
-  articleId   String
-  updatedAt   DateTime @updatedAt
-  createdAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  articleId String
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 }

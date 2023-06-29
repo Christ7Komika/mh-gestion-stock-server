@@ -21,7 +21,6 @@ export class ArticlesController {
           code: true,
           type: true,
           designation: true,
-          quantity: true,
           length: true,
           purchasePrice: true,
           sellingPrice: true,
@@ -80,7 +79,6 @@ export class ArticlesController {
           code: true,
           type: true,
           designation: true,
-          quantity: true,
           length: true,
           purchasePrice: true,
           sellingPrice: true,
@@ -148,7 +146,27 @@ export class ArticlesController {
       comment,
     } = body;
     const image = file?.filename ? resolve(file?.path) : null;
-
+    console.log({
+      name,
+      code,
+      type,
+      designation,
+      quantity,
+      length,
+      purchasePrice,
+      sellingPrice,
+      unitPrice,
+      lotNumber,
+      operatingPressure,
+      diameter,
+      fluid,
+      reference,
+      supplier,
+      warehouse,
+      category,
+      stall,
+      comment,
+    });
     if (!name) {
       return res
         .status(404)
@@ -168,7 +186,7 @@ export class ArticlesController {
     if (!quantity && !length) {
       return res.status(404).json({
         message:
-          "Veuillez inserer soit la quantité ou la longueur  de l'article.",
+          "Veuillez inserer soit le nombre d'article ou la longeur de l' article  que vous voulez ajouter ou les deux.",
       });
     }
 
@@ -197,74 +215,77 @@ export class ArticlesController {
     }
 
     let commentData = null;
-
-    if (comment) {
-      commentData = await prisma.comment.create({
-        data: {
-          message: comment,
-        },
-      });
-    }
-
-    try {
-      const article = await prisma.article.create({
-        data: {
-          image: image,
-          name: name,
-          code: code,
-          type: type,
-          designation: designation,
-          quantity: quantity,
-          length: length,
-          purchasePrice: purchasePrice,
-          sellingPrice: sellingPrice,
-          unitPrice: unitPrice,
-          lotNumber: lotNumber,
-          operatingPressure: operatingPressure,
-          diameter: diameter,
-          fluid: fluid,
-          commentId: commentData?.id,
-          referenceId: reference,
-          supplierId: supplier,
-          warehouseId: warehouse,
-          categoryId: category,
-          stallId: stall,
-        },
-      });
-
+    let i = parseInt(quantity);
+    while (i) {
       try {
-        await HistoryService.create({
-          state: "Création",
-          type: "Article",
-          message: `Création de l'article ''${article.name}''\n${
-            article.quantity && "Quantité Ajouté " + article.quantity
-          }\n${
-            article.length && "Longeur de l'article ajouté " + article.length
-          } `,
-          commentId: article.commentId || "",
+        if (comment) {
+          commentData = await prisma.comment.create({
+            data: {
+              message: comment,
+            },
+          });
+        }
+
+        const article = await prisma.article.create({
+          data: {
+            image: image || "",
+            name: name,
+            code: code,
+            type: type,
+            designation: designation,
+            length: length && parseFloat(length),
+            purchasePrice: purchasePrice,
+            sellingPrice: sellingPrice,
+            unitPrice: unitPrice,
+            lotNumber: lotNumber,
+            operatingPressure: operatingPressure || null,
+            diameter: diameter || null,
+            fluid: fluid || null,
+            commentId: commentData?.id || "",
+            // referenceId: reference,
+            // supplierId: supplier,
+            // warehouseId: warehouse,
+            // categoryId: category,
+            // stallId: stall,
+          },
         });
 
         try {
-          await StoreService.inCommingStore(article.name, article.id);
-          return res.status(200).end();
+          await HistoryService.create({
+            state: "Création",
+            type: "Article",
+            message: `Création de l'article ''${article.name}''
+            ${quantity ? "Quantité Ajouté " + quantity : ""}
+            ${length ? "Longeur de l'article ajouté " + length : ""}`,
+            commentId: article.commentId || "",
+          });
+
+          try {
+            await StoreService.inCommingStore(article.id);
+            if (i === 1) {
+              return res.status(200).end();
+            }
+          } catch (e) {
+            return res.status(500).json({
+              message:
+                "La requête a échoué, impossible de rajouter l'article dans le stock entrant",
+              error: e,
+            });
+          }
         } catch (e) {
           return res.status(500).json({
-            message:
-              "La requête a échoué, impossible de rajouter l'article dans le stock entrant",
+            message: "La requête a échoué, impossible de créer l'historique",
             error: e,
           });
         }
       } catch (e) {
         return res.status(500).json({
-          message: "La requête a échoué, impossible de créer l'historique",
+          message: "La requête a échoué, impossible de créer un article",
           error: e,
         });
       }
-    } catch (e) {
-      return res.status(500).json({
-        message: "La requête a échoué, impossible de créer un article",
-        error: e,
-      });
+
+      i -= 1;
     }
   }
 
@@ -329,65 +350,75 @@ export class ArticlesController {
           diameter: diameter && diameter,
           fluid: fluid && fluid,
           commentId: commentData?.id,
-          referenceId: reference,
-          supplierId: supplier,
-          warehouseId: warehouse,
-          categoryId: category,
-          stallId: stall,
+          // referenceId: reference,
+          // supplierId: supplier,
+          // warehouseId: warehouse,
+          // categoryId: category,
+          // stallId: stall,
         },
       });
-
       try {
         await HistoryService.create({
           state: "Modification",
           type: "Article",
-          message: `Modification de l'article ''${article.name}''
-          \n${article.image && "L'image a été modifié"}
-          \n${
-            article.code &&
-            `Le code a été modifié ${articleData?.code} => ${article.code}`
+          message: `
+          Modification de l'article ''${article.name}''
+          ${article.image ? "L'image a été modifié" : ""}
+          ${
+            article.code
+              ? `Le code a été modifié ${articleData?.code} => ${article.code}`
+              : ""
           }
-          \n${
-            article.type &&
-            `Le type a été modifié ${articleData?.type} => ${article.type}`
+          ${
+            article.type
+              ? `Le type a été modifié ${articleData?.type} => ${article.type}`
+              : ""
           }
-          \n${
-            article.designation &&
-            `La désination a été modifié ${articleData?.designation} => ${article.designation}`
+          ${
+            article.designation
+              ? `La désination a été modifié ${articleData?.designation} => ${article.designation}`
+              : ""
           }
-          \n${
-            article.purchasePrice &&
-            `Le prix d'achat a été modifié ${articleData?.purchasePrice} => ${article.purchasePrice}`
+          ${
+            article.purchasePrice
+              ? `Le prix d'achat a été modifié ${articleData?.purchasePrice} => ${article.purchasePrice}`
+              : ""
           }
-          \n${
-            article.sellingPrice &&
-            `Le prix de vente a été modifié ${articleData?.sellingPrice} => ${article.sellingPrice}`
+          ${
+            article.sellingPrice
+              ? `Le prix de vente a été modifié ${articleData?.sellingPrice} => ${article.sellingPrice}`
+              : ""
           }
-          \n${
-            article.unitPrice &&
-            `Le prix unitaire a été modifié ${articleData?.unitPrice} => ${article.unitPrice}`
+          ${
+            article.unitPrice
+              ? `Le prix unitaire a été modifié ${articleData?.unitPrice} => ${article.unitPrice}`
+              : ""
           }
-          \n${
-            article.lotNumber &&
-            `Le numéroo lot a été modifié ${articleData?.lotNumber} => ${article.lotNumber}`
+          ${
+            article.lotNumber
+              ? `Le numéroo lot a été modifié ${articleData?.lotNumber} => ${article.lotNumber}`
+              : ""
           }
-          \n${
-            article.operatingPressure &&
-            `La pression de service a été modifié ${articleData?.operatingPressure} => ${article.operatingPressure}`
+          ${
+            article.operatingPressure
+              ? `La pression de service a été modifié ${articleData?.operatingPressure} => ${article.operatingPressure}`
+              : ""
           }
-          \n${
-            article.diameter &&
-            `Le diamètre a été modifié ${articleData?.diameter} => ${article.diameter}`
+          ${
+            article.diameter
+              ? `Le diamètre a été modifié ${articleData?.diameter} => ${article.diameter}`
+              : ""
           }
-          \n${
-            article.fluid &&
-            `Le fluide a été modifié ${articleData?.fluid} => ${article.fluid}`
+          ${
+            article.fluid
+              ? `Le fluide a été modifié ${articleData?.fluid} => ${article.fluid}`
+              : ""
           }
-          \n${article.referenceId && `Le reference a été modifié `}
-          \n${article.supplierId && `Le fournisseur a été modifié `}
-          \n${article.warehouseId && `L'entrepot a été modifié `}
-          \n${article.categoryId && `La catégorie a été modifié `}
-          \n${article.stallId && `L'emplacement a été modifié `}
+          ${article.referenceId ? `Le reference a été modifié ` : ""}
+          ${article.supplierId ? `Le fournisseur a été modifié ` : ""}
+          ${article.warehouseId ? `L'entrepot a été modifié ` : ""}
+          ${article.categoryId ? `La catégorie a été modifié ` : ""}
+          ${article.stallId ? `L'emplacement a été modifié ` : ""}
           `,
           commentId: commentData?.id || "",
         });
@@ -409,46 +440,112 @@ export class ArticlesController {
 
   static async addArticle({ body, file, params }: Request, res: Response) {
     const id: string = params.id;
-    const { quantity, length, comment } = body;
+    const {
+      quantity,
+      length,
+      lotNumber,
+      code,
+      supplier,
+      reference,
+      warehouse,
+      stall,
+      comment,
+      purchasePrice,
+      sellingPrice,
+      unitPrice,
+    } = body;
 
     let commentData = null;
 
-    if (comment) {
-      commentData = await prisma.comment.create({
-        data: {
-          message: comment,
-        },
-      });
-    }
     try {
-      const article = await prisma.article.findUniqueOrThrow({ where: { id } });
-      if (article) {
-        await prisma.article.update({
-          where: { id: id },
+      if (comment) {
+        commentData = await prisma.comment.create({
           data: {
-            quantity: article.quantity + quantity,
-            length: article.length + length,
+            message: comment,
           },
         });
-
-        try {
-          await HistoryService.create({
-            state: "Modification",
-            type: "Article",
-            message: `Article ''${article.name}'' ajout ${
-              quantity
-                ? "de " + quantity + " article(s) a été realisé."
-                : "de " + length + "mètre(s) a été réalisé."
+      }
+      const articleData = await prisma.article.findUniqueOrThrow({
+        where: { id },
+      });
+      if (articleData) {
+        let i = parseInt(quantity);
+        while (i) {
+          try {
+            if (comment) {
+              commentData = await prisma.comment.create({
+                data: {
+                  message: comment,
+                },
+              });
             }
-            `,
-            commentId: commentData?.id || "",
-          });
-          return res.status(200).end();
-        } catch (e) {
-          return res.status(500).json({
-            message: "La requête a échoué, impossible de créer l'historique",
-            error: e,
-          });
+
+            const article = await prisma.article.create({
+              data: {
+                image: articleData.image,
+                name: articleData.name,
+                code: code,
+                type: articleData.type,
+                designation: articleData.designation,
+                length: length && parseFloat(length),
+                purchasePrice: purchasePrice,
+                sellingPrice: sellingPrice,
+                unitPrice: unitPrice,
+                lotNumber: lotNumber,
+                operatingPressure: articleData.operatingPressure,
+                diameter: articleData.diameter,
+                fluid: articleData.fluid,
+                commentId: commentData?.id || "",
+                // referenceId: reference,
+                // supplierId: supplier,
+                // warehouseId: warehouse,
+                // stallId: stall,
+              },
+            });
+
+            try {
+              await HistoryService.create({
+                state: "Modification",
+                type: "Article",
+                message: `Article ''${article.name}'' ajout ${
+                  quantity &&
+                  "de " +
+                    quantity +
+                    ` article(s) a été realisé ${
+                      length && `d'une longueur de ${length} mètre(s)`
+                    }.`
+                }
+                `,
+                commentId: commentData?.id || "",
+              });
+
+              try {
+                await StoreService.inCommingStore(article.id);
+                if (i === 1) {
+                  return res.status(200).end();
+                }
+              } catch (e) {
+                return res.status(500).json({
+                  message:
+                    "La requête a échoué, impossible de rajouter l'article dans le stock entrant",
+                  error: e,
+                });
+              }
+            } catch (e) {
+              return res.status(500).json({
+                message:
+                  "La requête a échoué, impossible de créer l'historique",
+                error: e,
+              });
+            }
+          } catch (e) {
+            return res.status(500).json({
+              message: "La requête a échoué, impossible de créer un article",
+              error: e,
+            });
+          }
+
+          i -= 1;
         }
       }
     } catch (e) {
@@ -458,12 +555,11 @@ export class ArticlesController {
       });
     }
   }
+
   static async removeArticle({ body, file, params }: Request, res: Response) {
-    const id: string = params.id;
-    const { quantity, length, comment } = body;
-
+    const { name, quantity, code, warehouse, supplier, reference, comment } =
+      body;
     let commentData = null;
-
     if (comment) {
       commentData = await prisma.comment.create({
         data: {
@@ -472,50 +568,85 @@ export class ArticlesController {
       });
     }
     try {
-      const article = await prisma.article.findUniqueOrThrow({ where: { id } });
-      const newQty = article.quantity - quantity;
-      const newLen = article.length - length;
+      const articles = await prisma.article.findMany({
+        where: {
+          code: code,
+          // AND: {
+          // warehouseId: warehouse,
+          // supplierId: supplier,
+          // referenceId: reference,
+          // },
+        },
+        take: parseInt(quantity),
+      });
 
-      if (newQty < 0) {
+      await HistoryService.create({
+        state: "Suppression",
+        type: "Article",
+        message: `
+        ${articles.length} article(s) ''${name}'' ont été retiré 
+        code => ${code}.
+        `,
+        commentId: commentData?.id || "",
+      });
+      await prisma.article.deleteMany({
+        where: {
+          OR: articles.map((article) => ({
+            AND: {
+              id: article.id,
+            },
+          })),
+        },
+      });
+
+      return res.status(200).end();
+    } catch (e) {
+      return res.status(500).json({
+        message: "La requête a échoué.",
+        error: e,
+      });
+    }
+  }
+  static async removeLength({ body, file, params }: Request, res: Response) {
+    const id: string = params.id;
+    const { length, comment } = body;
+    let commentData = null;
+    if (comment) {
+      commentData = await prisma.comment.create({
+        data: {
+          message: comment,
+        },
+      });
+    }
+    try {
+      const article = await prisma.article.findUniqueOrThrow({
+        where: {
+          id: id,
+        },
+      });
+
+      if (article.length === 0) {
         return res.status(500).json({
-          message: "La quantité retirer est supperieur a la quantité en stock",
+          message: "La valeur de la longueur est 0 vous ne pouvez pas retirer",
         });
       }
 
-      if (newLen < 0) {
+      if (article.length < parseFloat(length)) {
         return res.status(500).json({
-          message: "La longueur retirer est supperieur a la longueur en stock",
+          message: "La valeur à retirer est superieur à la valeur en stock",
         });
       }
-      if (article) {
-        await prisma.article.update({
-          where: { id: id },
-          data: {
-            quantity: newQty,
-            length: newLen,
-          },
-        });
 
-        try {
-          await HistoryService.create({
-            state: "Modification",
-            type: "Article",
-            message: `Article ''${article.name}'' ajout ${
-              quantity
-                ? "de " + quantity + " article(s) a été realisé."
-                : "de " + length + "mètre(s) a été réalisé."
-            }
-            `,
-            commentId: commentData?.id || "",
-          });
-          return res.status(200).end();
-        } catch (e) {
-          return res.status(500).json({
-            message: "La requête a échoué, impossible de créer l'historique",
-            error: e,
-          });
-        }
-      }
+      const newLength = article.length - length;
+
+      await prisma.article.update({
+        where: { id: id },
+        data: {
+          length: length,
+        },
+      });
+
+      return res.status(200).end();
     } catch (e) {
       return res.status(500).json({
         message: "La requête a échoué.",

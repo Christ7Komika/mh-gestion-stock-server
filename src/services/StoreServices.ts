@@ -1,11 +1,10 @@
 import { prisma } from "../model/prisma";
 
 export class StoreService {
-  static async inCommingStore(name: string, id: string): Promise<boolean> {
+  static async inCommingStore(id: string): Promise<boolean> {
     try {
       await prisma.inComingStore.create({
         data: {
-          articleName: name,
           articleId: id,
         },
       });
