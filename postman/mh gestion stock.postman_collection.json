@@ -694,13 +694,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{gestion-stock}}/articles/c0e354f9-23dc-4e91-8bc7-97c1364d3435",
+							"raw": "{{gestion-stock}}/articles/8de589ab-98c0-4a72-afbe-b4ba2be262d3",
 							"host": [
 								"{{gestion-stock}}"
 							],
 							"path": [
 								"articles",
-								"c0e354f9-23dc-4e91-8bc7-97c1364d3435"
+								"8de589ab-98c0-4a72-afbe-b4ba2be262d3"
 							]
 						}
 					},
@@ -712,8 +712,104 @@
 						"method": "POST",
 						"header": [],
 						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Bureau\",\r\n    \"code\": \"GVBN5654NK\"\r\n}",
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "name",
+									"value": "flexible 1",
+									"type": "default"
+								},
+								{
+									"key": "code",
+									"value": "56464EFF",
+									"type": "default"
+								},
+								{
+									"key": "type",
+									"value": "Inox",
+									"type": "default"
+								},
+								{
+									"key": "designation",
+									"value": "flexible 1 inox",
+									"type": "default"
+								},
+								{
+									"key": "quantity",
+									"value": "12",
+									"type": "default"
+								},
+								{
+									"key": "purchasePrice",
+									"value": "120",
+									"type": "default"
+								},
+								{
+									"key": "sellingPrice",
+									"value": "200",
+									"type": "default"
+								},
+								{
+									"key": "unitPrice",
+									"value": "150",
+									"type": "default"
+								},
+								{
+									"key": "lotNumber",
+									"value": "SFE445",
+									"type": "default"
+								},
+								{
+									"key": "operatingPressure",
+									"value": "",
+									"type": "default"
+								},
+								{
+									"key": "diameter",
+									"value": "",
+									"type": "default"
+								},
+								{
+									"key": "fluid",
+									"value": "",
+									"type": "default"
+								},
+								{
+									"key": "reference",
+									"value": "54641CSDS",
+									"type": "default"
+								},
+								{
+									"key": "supplier",
+									"value": "DFBSKDJSD4V5",
+									"type": "default"
+								},
+								{
+									"key": "warehouse",
+									"value": "RFEF75F7",
+									"type": "default"
+								},
+								{
+									"key": "category",
+									"value": "46F54DVDV",
+									"type": "default"
+								},
+								{
+									"key": "stall",
+									"value": "WERG454F5D",
+									"type": "default"
+								},
+								{
+									"key": "comment",
+									"value": "Hello, World",
+									"type": "default"
+								}
+							],
 							"options": {
 								"raw": {
 									"language": "json"
@@ -738,8 +834,104 @@
 						"method": "PUT",
 						"header": [],
 						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Reserve\",\r\n    \"code\": \"SFJsdsNJLK\"\r\n}",
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "name",
+									"value": "flexible 142",
+									"type": "default"
+								},
+								{
+									"key": "code ",
+									"value": "56464EFF",
+									"type": "default"
+								},
+								{
+									"key": "type",
+									"value": "Inox",
+									"type": "default"
+								},
+								{
+									"key": "designation",
+									"value": "flexible 1 inox",
+									"type": "default"
+								},
+								{
+									"key": "quantity",
+									"value": "12",
+									"type": "default"
+								},
+								{
+									"key": "purchasePrice",
+									"value": "120",
+									"type": "default"
+								},
+								{
+									"key": "sellingPrice",
+									"value": "200",
+									"type": "default"
+								},
+								{
+									"key": "unitPrice",
+									"value": "150",
+									"type": "default"
+								},
+								{
+									"key": "lotNumber",
+									"value": "SFE445",
+									"type": "default"
+								},
+								{
+									"key": "operatingPressure",
+									"value": "",
+									"type": "default"
+								},
+								{
+									"key": "diameter",
+									"value": "",
+									"type": "default"
+								},
+								{
+									"key": "fluid",
+									"value": "",
+									"type": "default"
+								},
+								{
+									"key": "reference",
+									"value": "54641CSDS",
+									"type": "default"
+								},
+								{
+									"key": "supplier",
+									"value": "DFBSKDJSD4V5",
+									"type": "default"
+								},
+								{
+									"key": "warehouse",
+									"value": "RFEF75F7",
+									"type": "default"
+								},
+								{
+									"key": "category",
+									"value": "46F54DVDV",
+									"type": "default"
+								},
+								{
+									"key": "stall",
+									"value": "WERG454F5D",
+									"type": "default"
+								},
+								{
+									"key": "comment",
+									"value": "Hello, World",
+									"type": "default"
+								}
+							],
 							"options": {
 								"raw": {
 									"language": "json"
@@ -747,13 +939,124 @@
 							}
 						},
 						"url": {
-							"raw": "{{gestion-stock}}/stall/c0e354f9-23dc-4e91-8bc7-97c1364d3435",
+							"raw": "{{gestion-stock}}/articles/8de589ab-98c0-4a72-afbe-b4ba2be262d3",
 							"host": [
 								"{{gestion-stock}}"
 							],
 							"path": [
-								"stall",
-								"c0e354f9-23dc-4e91-8bc7-97c1364d3435"
+								"articles",
+								"8de589ab-98c0-4a72-afbe-b4ba2be262d3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add Article",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "code",
+									"value": "56464EFFJHGCJKSB",
+									"type": "default"
+								},
+								{
+									"key": "quantity",
+									"value": "3",
+									"type": "default"
+								},
+								{
+									"key": "purchasePrice",
+									"value": "120",
+									"type": "default"
+								},
+								{
+									"key": "sellingPrice",
+									"value": "200",
+									"type": "default"
+								},
+								{
+									"key": "unitPrice",
+									"value": "150",
+									"type": "default"
+								},
+								{
+									"key": "lotNumber",
+									"value": "SFE445",
+									"type": "default"
+								},
+								{
+									"key": "reference",
+									"value": "54641CSDS",
+									"type": "default"
+								},
+								{
+									"key": "supplier",
+									"value": "DFBSKDJSD4V5",
+									"type": "default"
+								},
+								{
+									"key": "warehouse",
+									"value": "RFEF75F7",
+									"type": "default"
+								},
+								{
+									"key": "stall",
+									"value": "WERG454F5D",
+									"type": "default"
+								},
+								{
+									"key": "comment",
+									"value": "Hello, World 2",
+									"type": "default"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gestion-stock}}/articles/add/5a8d848f-b4a0-45a2-89b8-a4e46d69a2fa",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"articles",
+								"add",
+								"5a8d848f-b4a0-45a2-89b8-a4e46d69a2fa"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "remove Article",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Flexible 1\",\r\n    \"code\": \"56464EFF5654\",\r\n    \"quantity\": 10,\r\n    \"warehouse\": \"56464EFF5654\",\r\n    \"supplier\": \"56464EFF5654\",\r\n    \"reference\": \"56464EFF5654\",\r\n    \"comment\": \"Hello world 4\"\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gestion-stock}}/articles/remove",
+							"host": [
+								"{{gestion-stock}}"
+							],
+							"path": [
+								"articles",
+								"remove"
 							]
 						}
 					},
