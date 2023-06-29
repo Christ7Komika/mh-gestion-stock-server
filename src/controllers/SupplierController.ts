@@ -3,20 +3,9 @@ import { prisma } from "../model/prisma";
 import { resolve } from "path";
 import { unlinkSync } from "fs";
 
-interface Reference {
-  referenceId: {
-    reference: [
-      {
-        id: string;
-      }
-    ];
-  };
-}
-
 export class SupplierController {
   static async index(req: Request, res: Response) {
     const id: string = req.params.id;
-
     try {
       const supplier = await prisma.supplier.findUnique({
         where: {
@@ -37,6 +26,7 @@ export class SupplierController {
         .json({ message: "La requête a échoué.", error: e });
     }
   }
+
   static async all(req: Request, res: Response) {
     return res.status(200).json(
       await prisma.supplier.findMany({

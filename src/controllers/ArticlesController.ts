@@ -5,16 +5,6 @@ import { unlinkSync } from "fs";
 import { HistoryService } from "../services/HistoryService";
 import { StoreService } from "../services/StoreServices";
 
-interface Comment {
-  commentId: {
-    comment: [
-      {
-        id: string;
-      }
-    ];
-  };
-}
-
 export class ArticlesController {
   static async index(req: Request, res: Response) {
     const id: string = req.params.id;
@@ -206,6 +196,16 @@ export class ArticlesController {
         .json({ message: "Veuillez inserer le numéro lot de l'article." });
     }
 
+    let commentData = null;
+
+    if (comment) {
+      commentData = await prisma.comment.create({
+        data: {
+          message: comment,
+        },
+      });
+    }
+
     try {
       const article = await prisma.article.create({
         data: {
@@ -223,11 +223,7 @@ export class ArticlesController {
           operatingPressure: operatingPressure,
           diameter: diameter,
           fluid: fluid,
-          Comment: {
-            create: {
-              message: comment,
-            },
-          }, // To see
+          commentId: commentData?.id,
           referenceId: reference,
           supplierId: supplier,
           warehouseId: warehouse,
@@ -237,22 +233,6 @@ export class ArticlesController {
       });
 
       try {
-        let articleData = await prisma.article.findUnique({
-          where: { id: article.id },
-          select: {
-            Comment: {
-              orderBy: {
-                creadtedAt: "desc",
-              },
-              take: 1,
-              select: {
-                id: true,
-              },
-            },
-          },
-        });
-
-        const commentId = (comment && articleData?.Comment[0].id) as string;
         await HistoryService.create({
           state: "Création",
           type: "Article",
@@ -261,7 +241,7 @@ export class ArticlesController {
           }\n${
             article.length && "Longeur de l'article ajouté " + article.length
           } `,
-          commentId: commentId,
+          commentId: article.commentId || "",
         });
 
         try {
@@ -311,8 +291,27 @@ export class ArticlesController {
     } = body;
     const image = file?.filename ? resolve(file?.path) : null;
 
+    let commentData = null;
+
+    if (comment) {
+      commentData = await prisma.comment.create({
+        data: {
+          message: comment,
+        },
+      });
+    }
+
+    const articleData = await prisma.article.findUnique({ where: { id: id } });
+
     try {
-      await prisma.article.update({
+      const { image: img } = await prisma.article.findUniqueOrThrow({
+        where: { id },
+      });
+
+      if (img) {
+        unlinkSync(img);
+      }
+      const article = await prisma.article.update({
         where: {
           id: id,
         },
@@ -329,11 +328,7 @@ export class ArticlesController {
           operatingPressure: operatingPressure && operatingPressure,
           diameter: diameter && diameter,
           fluid: fluid && fluid,
-          Comment: {
-            create: {
-              message: comment,
-            },
-          },
+          commentId: commentData?.id,
           referenceId: reference,
           supplierId: supplier,
           warehouseId: warehouse,
@@ -342,7 +337,67 @@ export class ArticlesController {
         },
       });
 
-      return res.status(200).end();
+      try {
+        await HistoryService.create({
+          state: "Modification",
+          type: "Article",
+          message: `Modification de l'article ''${article.name}''
+          \n${article.image && "L'image a été modifié"}
+          \n${
+            article.code &&
+            `Le code a été modifié ${articleData?.code} => ${article.code}`
+          }
+          \n${
+            article.type &&
+            `Le type a été modifié ${articleData?.type} => ${article.type}`
+          }
+          \n${
+            article.designation &&
+            `La désination a été modifié ${articleData?.designation} => ${article.designation}`
+          }
+          \n${
+            article.purchasePrice &&
+            `Le prix d'achat a été modifié ${articleData?.purchasePrice} => ${article.purchasePrice}`
+          }
+          \n${
+            article.sellingPrice &&
+            `Le prix de vente a été modifié ${articleData?.sellingPrice} => ${article.sellingPrice}`
+          }
+          \n${
+            article.unitPrice &&
+            `Le prix unitaire a été modifié ${articleData?.unitPrice} => ${article.unitPrice}`
+          }
+          \n${
+            article.lotNumber &&
+            `Le numéroo lot a été modifié ${articleData?.lotNumber} => ${article.lotNumber}`
+          }
+          \n${
+            article.operatingPressure &&
+            `La pression de service a été modifié ${articleData?.operatingPressure} => ${article.operatingPressure}`
+          }
+          \n${
+            article.diameter &&
+            `Le diamètre a été modifié ${articleData?.diameter} => ${article.diameter}`
+          }
+          \n${
+            article.fluid &&
+            `Le fluide a été modifié ${articleData?.fluid} => ${article.fluid}`
+          }
+          \n${article.referenceId && `Le reference a été modifié `}
+          \n${article.supplierId && `Le fournisseur a été modifié `}
+          \n${article.warehouseId && `L'entrepot a été modifié `}
+          \n${article.categoryId && `La catégorie a été modifié `}
+          \n${article.stallId && `L'emplacement a été modifié `}
+          `,
+          commentId: commentData?.id || "",
+        });
+        return res.status(200).end();
+      } catch (e) {
+        return res.status(500).json({
+          message: "La requête a échoué, impossible de créer l'historique",
+          error: e,
+        });
+      }
     } catch (e) {
       return res
         .status(500)
@@ -352,17 +407,153 @@ export class ArticlesController {
 
   static async getByGroup({ body, file, params }: Request, res: Response) {}
 
-  static async getPerNumber({ body, file, params }: Request, res: Response) {}
+  static async addArticle({ body, file, params }: Request, res: Response) {
+    const id: string = params.id;
+    const { quantity, length, comment } = body;
 
-  static async addArticle({ body, file, params }: Request, res: Response) {}
+    let commentData = null;
 
-  static async removeArticle({ body, file, params }: Request, res: Response) {}
-  static async moveToStore({ body, file, params }: Request, res: Response) {}
+    if (comment) {
+      commentData = await prisma.comment.create({
+        data: {
+          message: comment,
+        },
+      });
+    }
+    try {
+      const article = await prisma.article.findUniqueOrThrow({ where: { id } });
+      if (article) {
+        await prisma.article.update({
+          where: { id: id },
+          data: {
+            quantity: article.quantity + quantity,
+            length: article.length + length,
+          },
+        });
+
+        try {
+          await HistoryService.create({
+            state: "Modification",
+            type: "Article",
+            message: `Article ''${article.name}'' ajout ${
+              quantity
+                ? "de " + quantity + " article(s) a été realisé."
+                : "de " + length + "mètre(s) a été réalisé."
+            }
+            `,
+            commentId: commentData?.id || "",
+          });
+          return res.status(200).end();
+        } catch (e) {
+          return res.status(500).json({
+            message: "La requête a échoué, impossible de créer l'historique",
+            error: e,
+          });
+        }
+      }
+    } catch (e) {
+      return res.status(500).json({
+        message: "La requête a échoué.",
+        error: e,
+      });
+    }
+  }
+  static async removeArticle({ body, file, params }: Request, res: Response) {
+    const id: string = params.id;
+    const { quantity, length, comment } = body;
+
+    let commentData = null;
+
+    if (comment) {
+      commentData = await prisma.comment.create({
+        data: {
+          message: comment,
+        },
+      });
+    }
+    try {
+      const article = await prisma.article.findUniqueOrThrow({ where: { id } });
+      const newQty = article.quantity - quantity;
+      const newLen = article.length - length;
+
+      if (newQty < 0) {
+        return res.status(500).json({
+          message: "La quantité retirer est supperieur a la quantité en stock",
+        });
+      }
+
+      if (newLen < 0) {
+        return res.status(500).json({
+          message: "La longueur retirer est supperieur a la longueur en stock",
+        });
+      }
+      if (article) {
+        await prisma.article.update({
+          where: { id: id },
+          data: {
+            quantity: newQty,
+            length: newLen,
+          },
+        });
+
+        try {
+          await HistoryService.create({
+            state: "Modification",
+            type: "Article",
+            message: `Article ''${article.name}'' ajout ${
+              quantity
+                ? "de " + quantity + " article(s) a été realisé."
+                : "de " + length + "mètre(s) a été réalisé."
+            }
+            `,
+            commentId: commentData?.id || "",
+          });
+          return res.status(200).end();
+        } catch (e) {
+          return res.status(500).json({
+            message: "La requête a échoué, impossible de créer l'historique",
+            error: e,
+          });
+        }
+      }
+    } catch (e) {
+      return res.status(500).json({
+        message: "La requête a échoué.",
+        error: e,
+      });
+    }
+  }
+
+  static async moveToStore({ body, file, params }: Request, res: Response) {
+    const id: string = params.id;
+    const { quantity, length, warehouse } = body;
+
+    try {
+      const article = await prisma.article.findUniqueOrThrow({
+        where: { id: id },
+      });
+
+      await prisma.article.update({
+        where: { id: id },
+        data: {},
+      });
+    } catch (e) {
+      return res.status(500).json({
+        message: "La requette a échoué.",
+        error: e,
+      });
+    }
+  }
 
   static async destroy(req: Request, res: Response) {
     const id: string = req.params.id;
     try {
-      await prisma.supplier.delete({
+      const article = await prisma.article.findUniqueOrThrow({ where: { id } });
+
+      if (article?.image) {
+        unlinkSync(article?.image);
+      }
+      await prisma.article.delete({
         where: {
           id: id,
         },

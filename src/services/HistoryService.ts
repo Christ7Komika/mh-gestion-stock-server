@@ -5,6 +5,7 @@ interface History {
     | "Création"
     | "Ajout"
     | "Mis à jour"
+    | "Modification"
     | "Suppression"
     | "Retrait"
     | "Validation"

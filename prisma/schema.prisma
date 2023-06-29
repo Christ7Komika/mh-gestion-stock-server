@@ -81,8 +81,7 @@ model Comment {
   updatedAt  DateTime  @updatedAt
   creadtedAt DateTime  @default(now())
   History    History[]
-  Article    Article?  @relation(fields: [articleId], references: [id])
-  articleId  String?
+  Article    Article[]
 }
 
 model Article {
@@ -92,16 +91,16 @@ model Article {
   code              String
   type              String?
   designation       String
-  quantity          Int?
-  length            Int?
-  purchasePrice     String
-  sellingPrice      String
-  unitPrice         String
+  quantity          Int           @default(0)
+  length            Decimal       @default(0)
+  purchasePrice     String?
+  sellingPrice      String?
+  unitPrice         String?
   lotNumber         String
   operatingPressure String?
   diameter          String?
   fluid             String?
-  Comment           Comment[]
+  Comment           Comment?      @relation(fields: [commentId], references: [id])
   Reference         Reference?    @relation(fields: [referenceId], references: [id])
   referenceId       String?
   Supplier          Supplier?     @relation(fields: [supplierId], references: [id])
@@ -116,6 +115,7 @@ model Article {
   ticketId          String?
   Stall             Stall?        @relation(fields: [stallId], references: [id])
   stallId           String?
+  commentId         String?
 }
 
 model Ticket {
