@@ -6,9 +6,10 @@ import { unlinkSync } from "fs";
 export class ClientController {
   static async index(req: Request, res: Response) {
     const id: string = req.params.id;
-
     try {
-      const client = await prisma.client.findUnique({ where: { id: id } });
+      const client = await prisma.client.findUnique({
+        where: { id: id },
+      });
       return res.status(200).json(client);
     } catch (e) {
       return res
@@ -52,8 +53,8 @@ export class ClientController {
       }
     }
 
-    prisma.client
-      .create({
+    try {
+      await prisma.client.create({
         data: {
           logo: logo,
           name: name,
@@ -61,15 +62,15 @@ export class ClientController {
           phone: phone,
           email: email,
         },
-      })
-      .then(() => {
-        return res.status(200).end();
-      })
-      .catch((e) => {
-        return res
-          .status(500)
-          .json({ message: "La requêtte a échoué", error: e });
       });
+
+      const clients = await prisma.client.findMany();
+      return res.status(200).json(clients);
+    } catch (e) {
+      return res
+        .status(500)
+        .json({ message: "La requêtte a échoué", error: e });
+    }
   }
 
   static async update({ body, file, params }: Request, res: Response) {
@@ -96,7 +97,8 @@ export class ClientController {
         },
       });
 
-      return res.status(200).end();
+      const clients = await prisma.client.findMany();
+      return res.status(200).json(clients);
     } catch (e) {
       return res
         .status(500)
@@ -116,7 +118,8 @@ export class ClientController {
         },
       });
 
-      return res.status(200).end();
+      const clients = await prisma.client.findMany();
+      return res.status(200).json(clients);
     } catch (e) {
       return res.status(500).json({ message: "La requête a échoué", error: e });
     }
