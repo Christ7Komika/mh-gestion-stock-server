@@ -5,7 +5,10 @@ const router = Router();
 
 router.get("/:id", ClientController.index);
 router.get("/", ClientController.all);
+router.get("/history/add", ClientController.getHistory);
+router.post("/history/filter", ClientController.filterHistoryByDate);
 router.post("/", uploadImageFile, ClientController.create);
+router.post("/find", ClientController.searchClient);
 router.put("/:id", uploadImageFile, ClientController.update);
 router.delete("/:id", ClientController.destroy);
 

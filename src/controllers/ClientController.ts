@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../model/prisma";
 import { resolve } from "path";
 import { unlinkSync } from "fs";
+import { HistoryService } from "../services/HistoryService";
 
 export class ClientController {
   static async index(req: Request, res: Response) {
@@ -17,6 +18,7 @@ export class ClientController {
         .json({ message: "La requête a échoué.", error: e });
     }
   }
+
   static async all(req: Request, res: Response) {
     return res.status(200).json(await prisma.client.findMany());
   }
@@ -54,7 +56,7 @@ export class ClientController {
     }
 
     try {
-      await prisma.client.create({
+      const client = await prisma.client.create({
         data: {
           logo: logo,
           name: name,
@@ -62,6 +64,17 @@ export class ClientController {
           phone: phone,
           email: email,
         },
+      });
+
+      await HistoryService.create({
+        state: "Ajout",
+        type: "Client",
+        message: `
+        Un nouveau client vient d'être ajouté
+        Nom : ${client.name}
+        Société : ${client.company}.
+        `,
+        commentId: null,
       });
 
       const clients = await prisma.client.findMany();
@@ -78,15 +91,15 @@ export class ClientController {
     const { name, company, phone, email } = body;
     const logo = file?.filename ? resolve(file?.path) : null;
 
-    if (logo) {
-      const client = await prisma.client.findUnique({ where: { id: id } });
-      if (client && client.logo) {
-        unlinkSync(client?.logo);
-      }
-    }
-
     try {
-      await prisma.client.update({
+      let clientData = null;
+      clientData = await prisma.client.findUnique({ where: { id: id } });
+      if (logo) {
+        if (clientData && clientData.logo) {
+          unlinkSync(clientData?.logo);
+        }
+      }
+      const client = await prisma.client.update({
         where: { id: id },
         data: {
           logo: logo && logo,
@@ -97,6 +110,22 @@ export class ClientController {
         },
       });
 
+      await HistoryService.create({
+        state: "Modification",
+        type: "Client",
+        message: `
+        Les informations du client ${clientData?.name}:${
+          clientData?.company
+        } viennent d'être modifié.\n
+        ${logo && "Le logo vient d'être modifié\n"}
+        ${name && `An: ${clientData?.name} => Nn: ${client.name}\n\n`}
+        ${company && `Ana: ${clientData?.company} => Nna:${client.company}\n`}
+        ${email && `Ae: ${clientData?.email} => Ne: ${client.email}\n`}
+        ${phone && `Ap: ${clientData?.phone} => Np: ${client.phone}\n`}.
+        `,
+        commentId: null,
+      });
+
       const clients = await prisma.client.findMany();
       return res.status(200).json(clients);
     } catch (e) {
@@ -105,6 +134,7 @@ export class ClientController {
         .json({ message: "La requêtte a échoué", error: e });
     }
   }
+
   static async destroy(req: Request, res: Response) {
     const id: string = req.params.id;
     try {
@@ -118,10 +148,117 @@ export class ClientController {
         },
       });
 
+      await HistoryService.create({
+        state: "Suppression",
+        type: "Client",
+        message: `
+        Les informations du client ${client?.name}:${client?.company} viennent d'être retiré.
+        `,
+        commentId: null,
+      });
       const clients = await prisma.client.findMany();
       return res.status(200).json(clients);
     } catch (e) {
       return res.status(500).json({ message: "La requête a échoué", error: e });
     }
+  }
+
+  static async getHistory(req: Request, res: Response) {
+    res.status(200).json(
+      await prisma.history.findMany({
+        where: {
+          type: "Client",
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          state: true,
+          type: true,
+          message: true,
+          createdAt: true,
+          comment: {
+            select: {
+              message: true,
+            },
+          },
+        },
+      })
+    );
+  }
+
+  static async filterHistoryByDate({ body }: Request, res: Response) {
+    const { startDate, endDate } = body;
+    if (!startDate && !endDate) {
+      return res
+        .status(400)
+        .json({ message: "Une date doit au moins être envoyé." });
+    }
+    if (startDate && !endDate) {
+      return res.status(200).json(
+        await prisma.history.findMany({
+          where: {
+            type: "Client",
+            AND: {
+              createdAt: new Date(startDate),
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          select: {
+            id: true,
+            state: true,
+            type: true,
+            message: true,
+            createdAt: true,
+            comment: {
+              select: {
+                message: true,
+              },
+            },
+          },
+        })
+      );
+    }
+    if (startDate && endDate) {
+      return res.status(200).json(
+        await prisma.history.findMany({
+          where: {
+            type: "Client",
+            AND: {
+              createdAt: {
+                gte: new Date(startDate),
+                lte: new Date(endDate),
+              },
+            },
+          },
+        })
+      );
+    }
+  }
+
+  static async searchClient(req: Request, res: Response) {
+    const { search } = req.body;
+
+    return res.status(200).json(
+      await prisma.client.findMany({
+        where: {
+          OR: [
+            {
+              name: {
+                contains: search,
+              },
+            },
+            {
+              company: {
+                contains: search,
+              },
+            },
+          ],
+        },
+      })
+    );
   }
 }

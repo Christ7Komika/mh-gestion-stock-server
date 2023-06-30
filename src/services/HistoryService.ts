@@ -10,9 +10,9 @@ interface History {
     | "Retrait"
     | "Validation"
     | "Annulation";
-  type: "Article" | "Ticket";
+  type: "Article" | "Ticket" | "Client";
   message: string;
-  commentId: string;
+  commentId: string | null;
 }
 
 export class HistoryService {

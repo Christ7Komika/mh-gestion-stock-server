@@ -35,7 +35,12 @@ export class SupplierController {
           name: true,
           phone: true,
           email: true,
-          reference: true,
+          reference: {
+            select: {
+              name: true,
+            },
+          },
+          createdAt: true,
         },
       })
     );
