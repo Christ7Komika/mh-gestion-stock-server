@@ -10,7 +10,7 @@ interface History {
     | "Retrait"
     | "Validation"
     | "Annulation";
-  type: "Article" | "Ticket" | "Client";
+  type: "Article" | "Ticket" | "Client" | "Supplier";
   message: string;
   commentId: string | null;
 }

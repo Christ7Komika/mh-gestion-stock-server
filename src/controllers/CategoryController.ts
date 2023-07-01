@@ -8,9 +8,11 @@ export class CategoryController {
       .status(200)
       .json(await prisma.category.findUnique({ where: { id } }));
   }
+
   static async all(req: Request, res: Response) {
     return res.status(200).json(await prisma.category.findMany());
   }
+
   static async create({ body }: Request, res: Response) {
     const { name } = body;
     if (!name) {

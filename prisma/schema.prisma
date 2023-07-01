@@ -24,23 +24,14 @@ model Client {
 }
 
 model Supplier {
-  id        String      @id @default(uuid())
+  id        String    @id @default(uuid())
   logo      String?
   name      String
-  phone     String?     @unique
-  email     String?     @unique
-  reference Reference[]
+  phone     String?   @unique
+  email     String?   @unique
   articles  Article[]
-  updatedAt DateTime    @updatedAt
-  createdAt DateTime    @default(now())
-}
-
-model Reference {
-  id         String    @id @default(uuid())
-  name       String
-  articles   Article[]
-  Supplier   Supplier? @relation(fields: [supplierId], references: [id])
-  supplierId String?
+  updatedAt DateTime  @updatedAt
+  createdAt DateTime  @default(now())
 }
 
 model Category {
@@ -101,8 +92,6 @@ model Article {
   fluid             String?
   Comment           Comment?      @relation(fields: [commentId], references: [id])
   commentId         String?
-  Reference         Reference?    @relation(fields: [referenceId], references: [id])
-  referenceId       String?
   Supplier          Supplier?     @relation(fields: [supplierId], references: [id])
   supplierId        String?
   Warehouse         Warehouse?    @relation(fields: [warehouseId], references: [id])

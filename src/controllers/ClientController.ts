@@ -114,7 +114,7 @@ export class ClientController {
         state: "Modification",
         type: "Client",
         message: `
-        Les informations du client ${clientData?.name}:${
+        Les informations du client ${client?.name}:${
           clientData?.company
         } viennent d'être modifié.\n
         ${logo && "Le logo vient d'être modifié\n"}
@@ -178,11 +178,6 @@ export class ClientController {
           type: true,
           message: true,
           createdAt: true,
-          comment: {
-            select: {
-              message: true,
-            },
-          },
         },
       })
     );
@@ -213,11 +208,6 @@ export class ClientController {
             type: true,
             message: true,
             createdAt: true,
-            comment: {
-              select: {
-                message: true,
-              },
-            },
           },
         })
       );

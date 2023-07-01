@@ -5,7 +5,10 @@ const router = Router();
 
 router.get("/:id", SupplierController.index);
 router.get("/", SupplierController.all);
+router.get("/history/add", SupplierController.getHistory);
+router.post("/history/filter", SupplierController.filterHistoryByDate);
 router.post("/", uploadImageFile, SupplierController.create);
+router.post("/find", SupplierController.searchSuppliers);
 router.put("/:id", uploadImageFile, SupplierController.update);
 router.delete("/:id", SupplierController.destroy);
 

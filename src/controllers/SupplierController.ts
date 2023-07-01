@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../model/prisma";
 import { resolve } from "path";
 import { unlinkSync } from "fs";
+import { HistoryService } from "../services/HistoryService";
 
 export class SupplierController {
   static async index(req: Request, res: Response) {
@@ -16,7 +17,7 @@ export class SupplierController {
           name: true,
           phone: true,
           email: true,
-          reference: true,
+          createdAt: true,
         },
       });
       return res.status(200).json(supplier);
@@ -35,11 +36,6 @@ export class SupplierController {
           name: true,
           phone: true,
           email: true,
-          reference: {
-            select: {
-              name: true,
-            },
-          },
           createdAt: true,
         },
       })
@@ -47,7 +43,7 @@ export class SupplierController {
   }
 
   static async create({ body, file }: Request, res: Response) {
-    const { name, reference, phone, email } = body;
+    const { name, phone, email } = body;
     const logo = file?.filename ? resolve(file?.path) : null;
 
     if (!name) {
@@ -78,58 +74,49 @@ export class SupplierController {
       }
     }
 
-    prisma.supplier
-      .create({
+    try {
+      const supplier = await prisma.supplier.create({
         data: {
           logo: logo,
           name: name,
           phone: phone,
           email: email,
-          reference: {
-            create: {
-              name: reference,
-            },
-          },
         },
-      })
-      .then(() => {
-        return res.status(200).end();
-      })
-      .catch((e) => {
-        return res
-          .status(500)
-          .json({ message: "La requêtte a échoué", error: e });
       });
+
+      await HistoryService.create({
+        state: "Ajout",
+        type: "Supplier",
+        message: `
+          Un nouveau fournisseur vient d'être ajouté
+          Nom : ${supplier.name}.
+          `,
+        commentId: null,
+      });
+
+      const suppliers = await prisma.supplier.findMany();
+      return res.status(200).json(suppliers);
+    } catch (e) {
+      return res
+        .status(500)
+        .json({ message: "La requêtte a échoué", error: e });
+    }
   }
 
   static async update({ body, file, params }: Request, res: Response) {
     const id: string = params.id;
-    const { name, reference, phone, email } = body;
+    const { name, phone, email } = body;
     const logo = file?.filename ? resolve(file?.path) : null;
 
+    const supplier = await prisma.supplier.findUnique({ where: { id: id } });
     if (logo) {
-      const supplier = await prisma.supplier.findUnique({ where: { id: id } });
       if (supplier && supplier.logo) {
         unlinkSync(supplier.logo);
       }
     }
 
     try {
-      let referenceData = await prisma.supplier.findUnique({
-        where: { id: id },
-        select: {
-          reference: {
-            select: {
-              id: true,
-            },
-          },
-        },
-      });
-
-      const referenceId = (referenceData &&
-        referenceData?.reference[0].id) as string;
-
-      await prisma.supplier.update({
+      const supplierData = await prisma.supplier.update({
         where: {
           id: id,
         },
@@ -138,20 +125,26 @@ export class SupplierController {
           name: name && name,
           phone: phone && phone,
           email: email && email,
-          reference: {
-            update: {
-              where: {
-                id: referenceId || "",
-              },
-              data: {
-                name: reference,
-              },
-            },
-          },
         },
       });
 
-      return res.status(200).end();
+      await HistoryService.create({
+        state: "Modification",
+        type: "Supplier",
+        message: `
+        Les informations du fournisseur ${
+          supplierData?.name
+        } viennent d'être modifié.\n
+        ${logo && "Le logo vient d'être modifié\n"}
+        ${name && `An: ${supplier?.name} => Nn: ${supplierData.name}\n\n`}
+        ${email && `Ae: ${supplier?.email} => Ne: ${supplierData.email}\n`}
+        ${phone && `Ap: ${supplier?.phone} => Np: ${supplierData.phone}\n`}.
+        `,
+        commentId: null,
+      });
+
+      const suppliers = await prisma.supplier.findMany();
+      return res.status(200).json(suppliers);
     } catch (e) {
       return res
         .status(500)
@@ -171,11 +164,101 @@ export class SupplierController {
         },
       });
 
-      return res.status(200).end();
+      await HistoryService.create({
+        state: "Suppression",
+        type: "Supplier",
+        message: `
+        Les informations du fournisseur ${supplier?.name} viennent d'être retiré.
+        `,
+        commentId: null,
+      });
+
+      const suppliers = await prisma.supplier.findMany();
+      return res.status(200).json(suppliers);
     } catch (e) {
       return res
         .status(500)
         .json({ message: "La requête a échoué.", error: e });
     }
+  }
+
+  static async getHistory(req: Request, res: Response) {
+    res.status(200).json(
+      await prisma.history.findMany({
+        where: {
+          type: "Supplier",
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          state: true,
+          type: true,
+          message: true,
+          createdAt: true,
+        },
+      })
+    );
+  }
+
+  static async filterHistoryByDate({ body }: Request, res: Response) {
+    const { startDate, endDate } = body;
+    if (!startDate && !endDate) {
+      return res
+        .status(400)
+        .json({ message: "Une date doit au moins être envoyé." });
+    }
+    if (startDate && !endDate) {
+      return res.status(200).json(
+        await prisma.history.findMany({
+          where: {
+            type: "Supplier",
+            AND: {
+              createdAt: new Date(startDate),
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          select: {
+            id: true,
+            state: true,
+            type: true,
+            message: true,
+            createdAt: true,
+          },
+        })
+      );
+    }
+    if (startDate && endDate) {
+      return res.status(200).json(
+        await prisma.history.findMany({
+          where: {
+            type: "Supplier",
+            AND: {
+              createdAt: {
+                gte: new Date(startDate),
+                lte: new Date(endDate),
+              },
+            },
+          },
+        })
+      );
+    }
+  }
+
+  static async searchSuppliers(req: Request, res: Response) {
+    const { search } = req.body;
+
+    return res.status(200).json(
+      await prisma.supplier.findMany({
+        where: {
+          name: {
+            contains: search,
+          },
+        },
+      })
+    );
   }
 }
