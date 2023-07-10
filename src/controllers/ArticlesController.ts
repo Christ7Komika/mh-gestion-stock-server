@@ -60,6 +60,7 @@ export class ArticlesController {
         .json({ message: "La requête a échoué.", error: e });
     }
   }
+
   static async all(req: Request, res: Response) {
     return res.status(200).json(
       await prisma.article.findMany({
@@ -333,13 +334,12 @@ export class ArticlesController {
       lotNumber,
       code,
       supplier,
-      reference,
       warehouse,
-      stall,
       comment,
       purchasePrice,
       sellingPrice,
       unitPrice,
+      reference,
     } = body;
 
     let commentData = null;
@@ -382,11 +382,10 @@ export class ArticlesController {
                 operatingPressure: articleData.operatingPressure,
                 diameter: articleData.diameter,
                 fluid: articleData.fluid,
+                reference: reference && reference,
                 commentId: commentData?.id || "",
-                // referenceId: reference,
                 // supplierId: supplier,
                 // warehouseId: warehouse,
-                // stallId: stall,
               },
             });
 
@@ -444,8 +443,7 @@ export class ArticlesController {
   }
 
   static async removeArticle({ body, file, params }: Request, res: Response) {
-    const { name, quantity, code, warehouse, supplier, reference, comment } =
-      body;
+    const { name, quantity, code, warehouse, supplier, comment } = body;
     let commentData = null;
     if (comment) {
       commentData = await prisma.comment.create({
@@ -461,7 +459,6 @@ export class ArticlesController {
           // AND: {
           // warehouseId: warehouse,
           // supplierId: supplier,
-          // referenceId: reference,
           // },
         },
         take: parseInt(quantity),
@@ -494,6 +491,7 @@ export class ArticlesController {
       });
     }
   }
+
   static async removeLength({ body, file, params }: Request, res: Response) {
     const id: string = params.id;
     const { length, comment } = body;

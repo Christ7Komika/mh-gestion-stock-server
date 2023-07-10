@@ -35,25 +35,19 @@ model Supplier {
 }
 
 model Category {
-  id       String    @id @default(uuid())
-  name     String
-  articles Article[]
+  id          String    @id @default(uuid())
+  name        String
+  reference   String?
+  description String?
+  articles    Article[]
+  createdAt   DateTime  @default(now())
 }
 
 model Warehouse {
-  id        String         @id @default(uuid())
-  group     GroupArticle[]
-  name      String         @unique
-  stat      Int
-  articles  Article[]
-  updatedAt DateTime       @updatedAt()
-}
-
-model GroupArticle {
-  id          String     @id @default(uuid())
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
   articles    Article[]
-  Warehouse   Warehouse? @relation(fields: [warehouseId], references: [id])
-  warehouseId String?
 }
 
 model Comment {
@@ -66,7 +60,7 @@ model Comment {
 }
 
 model Article {
-  id                String        @id @default(uuid())
+  id                String     @id @default(uuid())
   image             String?
   name              String
   code              String?
@@ -82,17 +76,15 @@ model Article {
   operatingPressure String?
   diameter          String?
   fluid             String?
-  Comment           Comment?      @relation(fields: [commentId], references: [id])
+  Comment           Comment?   @relation(fields: [commentId], references: [id])
   commentId         String?
-  Supplier          Supplier?     @relation(fields: [supplierId], references: [id])
+  Supplier          Supplier?  @relation(fields: [supplierId], references: [id])
   supplierId        String?
-  Warehouse         Warehouse?    @relation(fields: [warehouseId], references: [id])
+  Warehouse         Warehouse? @relation(fields: [warehouseId], references: [id])
   warehouseId       String?
-  Category          Category?     @relation(fields: [categoryId], references: [id])
+  Category          Category?  @relation(fields: [categoryId], references: [id])
   categoryId        String?
-  GroupArticle      GroupArticle? @relation(fields: [groupArticleId], references: [id])
-  groupArticleId    String?
-  Ticket            Ticket?       @relation(fields: [ticketId], references: [id])
+  Ticket            Ticket?    @relation(fields: [ticketId], references: [id])
   ticketId          String?
 }
 
