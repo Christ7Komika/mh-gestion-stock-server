@@ -5,3 +5,138 @@ Ajout du champ total article enregistre, article vendus, article restant
 Fournisseur
 total article achetes chez le fournisseur,
 total article
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+provider = "prisma-client-js"
+}
+
+datasource db {
+provider = "sqlite"
+url = env("DATABASE_URL")
+}
+
+model Client {
+id String @id @default(uuid())
+logo String?
+name String
+company String
+phone String? @unique
+email String? @unique
+updatedAt DateTime @updatedAt
+createdAt DateTime @default(now())
+Ticket Ticket[]
+ticketId String?
+}
+
+model Supplier {
+id String @id @default(uuid())
+logo String?
+name String
+phone String? @unique
+email String? @unique
+articles Article[]
+updatedAt DateTime @updatedAt
+createdAt DateTime @default(now())
+}
+
+model Category {
+id String @id @default(uuid())
+name String
+articles Article[]
+}
+
+model Warehouse {
+id String @id @default(uuid())
+group GroupArticle[]
+name String @unique
+stat Int
+articles Article[]
+updatedAt DateTime @updatedAt()
+}
+
+model GroupArticle {
+id String @id @default(uuid())
+articles Article[]
+Warehouse Warehouse? @relation(fields: [warehouseId], references: [id])
+warehouseId String?
+}
+
+model Comment {
+id String @id @default(uuid())
+message String
+updatedAt DateTime @updatedAt
+creadtedAt DateTime @default(now())
+History History[]
+Article Article[]
+}
+
+model Article {
+id String @id @default(uuid())
+image String?
+name String
+code String?
+type String?
+designation String?
+quantity Float
+hasLength Boolean?
+purchasePrice String?
+reference String?
+sellingPrice String?
+unitPrice String?
+lotNumber String?
+operatingPressure String?
+diameter String?
+fluid String?
+Comment Comment? @relation(fields: [commentId], references: [id])
+commentId String?
+Supplier Supplier? @relation(fields: [supplierId], references: [id])
+supplierId String?
+Warehouse Warehouse? @relation(fields: [warehouseId], references: [id])
+warehouseId String?
+Category Category? @relation(fields: [categoryId], references: [id])
+categoryId String?
+GroupArticle GroupArticle? @relation(fields: [groupArticleId], references: [id])
+groupArticleId String?
+Ticket Ticket? @relation(fields: [ticketId], references: [id])
+ticketId String?
+}
+
+model Ticket {
+id String @id @default(uuid())
+name String
+purchaseOrder String
+status String
+articles Article[]
+updatedAt DateTime @updatedAt
+createdAt DateTime @default(now())
+OutGoingStore OutGoingStore? @relation(fields: [outGoingStoreId], references: [id])
+outGoingStoreId String?
+Client Client? @relation(fields: [clientId], references: [id])
+clientId String?
+}
+
+model History {
+id String @id @default(uuid())
+state String
+type String
+message String
+comment Comment? @relation(fields: [commentId], references: [id])
+updatedAt DateTime @updatedAt
+createdAt DateTime @default(now())
+commentId String?
+}
+
+model OutGoingStore {
+id String @id @default(uuid())
+tickets Ticket[]
+}
+
+model inComingStore {
+id String @id @default(uuid())
+articleId String
+updatedAt DateTime @updatedAt
+createdAt DateTime @default(now())
+}
