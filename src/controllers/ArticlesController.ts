@@ -5,6 +5,43 @@ import { unlinkSync } from "fs";
 import { HistoryService } from "../services/HistoryService";
 import { StoreService } from "../services/StoreServices";
 
+const articles = {
+  id: true,
+  image: true,
+  name: true,
+  code: true,
+  type: true,
+  designation: true,
+  quantity: true,
+  hasLength: true,
+  purchasePrice: true,
+  sellingPrice: true,
+  unitPrice: true,
+  lotNumber: true,
+  operatingPressure: true,
+  diameter: true,
+  fluid: true,
+  Supplier: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
+
+  Warehouse: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
+  Category: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
+};
+
 export class ArticlesController {
   static async index(req: Request, res: Response) {
     const id: string = req.params.id;
@@ -14,53 +51,7 @@ export class ArticlesController {
         where: {
           id: id,
         },
-        select: {
-          id: true,
-          image: true,
-          name: true,
-          code: true,
-          type: true,
-          designation: true,
-          length: true,
-          purchasePrice: true,
-          sellingPrice: true,
-          unitPrice: true,
-          lotNumber: true,
-          operatingPressure: true,
-          diameter: true,
-          fluid: true,
-          Reference: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          Supplier: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-
-          Warehouse: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          Category: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          Stall: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
+        select: articles,
       });
       return res.status(200).json(supplier);
     } catch (e) {
@@ -72,53 +63,7 @@ export class ArticlesController {
   static async all(req: Request, res: Response) {
     return res.status(200).json(
       await prisma.article.findMany({
-        select: {
-          id: true,
-          image: true,
-          name: true,
-          code: true,
-          type: true,
-          designation: true,
-          length: true,
-          purchasePrice: true,
-          sellingPrice: true,
-          unitPrice: true,
-          lotNumber: true,
-          operatingPressure: true,
-          diameter: true,
-          fluid: true,
-          Reference: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          Supplier: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-
-          Warehouse: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          Category: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          Stall: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
+        select: articles,
       })
     );
   }
@@ -130,7 +75,7 @@ export class ArticlesController {
       type,
       designation,
       quantity,
-      length,
+      hasLength,
       purchasePrice,
       sellingPrice,
       unitPrice,
@@ -142,76 +87,19 @@ export class ArticlesController {
       supplier,
       warehouse,
       category,
-      stall,
       comment,
     } = body;
     const image = file?.filename ? resolve(file?.path) : null;
-    console.log({
-      name,
-      code,
-      type,
-      designation,
-      quantity,
-      length,
-      purchasePrice,
-      sellingPrice,
-      unitPrice,
-      lotNumber,
-      operatingPressure,
-      diameter,
-      fluid,
-      reference,
-      supplier,
-      warehouse,
-      category,
-      stall,
-      comment,
-    });
     if (!name) {
       return res
         .status(404)
         .json({ message: "Veuillez inserer le nom de l'article." });
     }
-    if (!code) {
-      return res
-        .status(404)
-        .json({ message: "Veuillez inserer le code de l'article." });
-    }
-    if (!designation) {
-      return res
-        .status(404)
-        .json({ message: "Veuillez inserer la désignation de l'article." });
-    }
-
-    if (!quantity && !length) {
+    if (!quantity) {
       return res.status(404).json({
         message:
           "Veuillez inserer soit le nombre d'article ou la longeur de l' article  que vous voulez ajouter ou les deux.",
       });
-    }
-
-    if (!purchasePrice) {
-      return res
-        .status(404)
-        .json({ message: "Veuillez inserer le prix d'achat de l'article." });
-    }
-
-    if (!sellingPrice) {
-      return res
-        .status(404)
-        .json({ message: "Veuillez inserer le prix de vente de l'article." });
-    }
-
-    if (!unitPrice) {
-      return res.status(404).json({
-        message: "Veuillez inserer le prix de unitaire de l'article.",
-      });
-    }
-
-    if (!lotNumber) {
-      return res
-        .status(404)
-        .json({ message: "Veuillez inserer le numéro lot de l'article." });
     }
 
     let commentData = null;
@@ -233,20 +121,20 @@ export class ArticlesController {
             code: code,
             type: type,
             designation: designation,
-            length: length && parseFloat(length),
+            quantity: parseFloat(quantity),
+            hasLength: hasLength,
             purchasePrice: purchasePrice,
             sellingPrice: sellingPrice,
             unitPrice: unitPrice,
             lotNumber: lotNumber,
-            operatingPressure: operatingPressure || null,
-            diameter: diameter || null,
-            fluid: fluid || null,
+            operatingPressure: operatingPressure,
+            diameter: diameter,
+            fluid: fluid,
             commentId: commentData?.id || "",
-            // referenceId: reference,
-            // supplierId: supplier,
-            // warehouseId: warehouse,
-            // categoryId: category,
-            // stallId: stall,
+            reference: reference,
+            supplierId: supplier,
+            warehouseId: warehouse,
+            categoryId: category,
           },
         });
 
@@ -263,7 +151,9 @@ export class ArticlesController {
           try {
             await StoreService.inCommingStore(article.id);
             if (i === 1) {
-              return res.status(200).end();
+              return res
+                .status(200)
+                .json(await prisma.article.findMany({ select: articles }));
             }
           } catch (e) {
             return res.status(500).json({
@@ -307,7 +197,6 @@ export class ArticlesController {
       supplier,
       warehouse,
       category,
-      stall,
       comment,
     } = body;
     const image = file?.filename ? resolve(file?.path) : null;
@@ -350,11 +239,10 @@ export class ArticlesController {
           diameter: diameter && diameter,
           fluid: fluid && fluid,
           commentId: commentData?.id,
-          // referenceId: reference,
-          // supplierId: supplier,
-          // warehouseId: warehouse,
-          // categoryId: category,
-          // stallId: stall,
+          reference: reference && reference,
+          supplierId: supplier && supplier,
+          warehouseId: warehouse && warehouse,
+          categoryId: category && category,
         },
       });
       try {
@@ -414,15 +302,15 @@ export class ArticlesController {
               ? `Le fluide a été modifié ${articleData?.fluid} => ${article.fluid}`
               : ""
           }
-          ${article.referenceId ? `Le reference a été modifié ` : ""}
           ${article.supplierId ? `Le fournisseur a été modifié ` : ""}
           ${article.warehouseId ? `L'entrepot a été modifié ` : ""}
           ${article.categoryId ? `La catégorie a été modifié ` : ""}
-          ${article.stallId ? `L'emplacement a été modifié ` : ""}
           `,
           commentId: commentData?.id || "",
         });
-        return res.status(200).end();
+        return res
+          .status(200)
+          .json(await prisma.article.findMany({ select: articles }));
       } catch (e) {
         return res.status(500).json({
           message: "La requête a échoué, impossible de créer l'historique",
@@ -442,7 +330,6 @@ export class ArticlesController {
     const id: string = params.id;
     const {
       quantity,
-      length,
       lotNumber,
       code,
       supplier,
@@ -487,7 +374,7 @@ export class ArticlesController {
                 code: code,
                 type: articleData.type,
                 designation: articleData.designation,
-                length: length && parseFloat(length),
+                quantity: quantity && parseFloat(quantity),
                 purchasePrice: purchasePrice,
                 sellingPrice: sellingPrice,
                 unitPrice: unitPrice,
@@ -625,26 +512,26 @@ export class ArticlesController {
         },
       });
 
-      if (article.length === 0) {
-        return res.status(500).json({
-          message: "La valeur de la longueur est 0 vous ne pouvez pas retirer",
-        });
-      }
+      // if (article.length === 0) {
+      //   return res.status(500).json({
+      //     message: "La valeur de la longueur est 0 vous ne pouvez pas retirer",
+      //   });
+      // }
 
-      if (article.length < parseFloat(length)) {
-        return res.status(500).json({
-          message: "La valeur à retirer est superieur à la valeur en stock",
-        });
-      }
+      // if (article.length < parseFloat(length)) {
+      //   return res.status(500).json({
+      //     message: "La valeur à retirer est superieur à la valeur en stock",
+      //   });
+      // }
 
-      const newLength = article.length - length;
+      // const newLength = article.length - length;
 
-      await prisma.article.update({
-        where: { id: id },
-        data: {
-          length: length,
-        },
-      });
+      // await prisma.article.update({
+      //   where: { id: id },
+      //   data: {
+      //     length: length,
+      //   },
+      // });
 
       return res.status(200).end();
     } catch (e) {
@@ -689,8 +576,9 @@ export class ArticlesController {
           id: id,
         },
       });
-
-      return res.status(200).end();
+      return res
+        .status(200)
+        .json(await prisma.article.findMany({ select: articles }));
     } catch (e) {
       return res.status(500).json({ message: "La requête a échoué", error: e });
     }

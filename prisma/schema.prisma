@@ -56,16 +56,6 @@ model GroupArticle {
   warehouseId String?
 }
 
-model Stall {
-  id         String    @id @default(uuid())
-  name       String
-  code       String?
-  article    Article[]
-  state      Int       @default(0)
-  updatedAt  DateTime  @updatedAt
-  creadtedAt DateTime  @default(now())
-}
-
 model Comment {
   id         String    @id @default(uuid())
   message    String
@@ -79,14 +69,16 @@ model Article {
   id                String        @id @default(uuid())
   image             String?
   name              String
-  code              String
+  code              String?
   type              String?
-  designation       String
-  length            Float         @default(0)
+  designation       String?
+  quantity          Float
+  hasLength         Boolean?
   purchasePrice     String?
+  reference         String?
   sellingPrice      String?
   unitPrice         String?
-  lotNumber         String
+  lotNumber         String?
   operatingPressure String?
   diameter          String?
   fluid             String?
@@ -102,8 +94,6 @@ model Article {
   groupArticleId    String?
   Ticket            Ticket?       @relation(fields: [ticketId], references: [id])
   ticketId          String?
-  Stall             Stall?        @relation(fields: [stallId], references: [id])
-  stallId           String?
 }
 
 model Ticket {

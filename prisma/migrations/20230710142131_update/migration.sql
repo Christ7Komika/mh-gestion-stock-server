@@ -23,14 +23,6 @@ CREATE TABLE "Supplier" (
 );
 
 -- CreateTable
-CREATE TABLE "Reference" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "name" TEXT NOT NULL,
-    "supplierId" TEXT,
-    CONSTRAINT "Reference_supplierId_fkey" FOREIGN KEY ("supplierId") REFERENCES "Supplier" ("id") ON DELETE SET NULL ON UPDATE CASCADE
-);
-
--- CreateTable
 CREATE TABLE "Category" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL
@@ -52,16 +44,6 @@ CREATE TABLE "GroupArticle" (
 );
 
 -- CreateTable
-CREATE TABLE "Stall" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "name" TEXT NOT NULL,
-    "code" TEXT,
-    "state" INTEGER NOT NULL DEFAULT 0,
-    "updatedAt" DATETIME NOT NULL,
-    "creadtedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
--- CreateTable
 CREATE TABLE "Comment" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "message" TEXT NOT NULL,
@@ -74,33 +56,31 @@ CREATE TABLE "Article" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "image" TEXT,
     "name" TEXT NOT NULL,
-    "code" TEXT NOT NULL,
+    "code" TEXT,
     "type" TEXT,
-    "designation" TEXT NOT NULL,
-    "length" REAL NOT NULL DEFAULT 0,
+    "designation" TEXT,
+    "quantity" REAL NOT NULL,
+    "hasLength" BOOLEAN,
     "purchasePrice" TEXT,
+    "reference" TEXT,
     "sellingPrice" TEXT,
     "unitPrice" TEXT,
-    "lotNumber" TEXT NOT NULL,
+    "lotNumber" TEXT,
     "operatingPressure" TEXT,
     "diameter" TEXT,
     "fluid" TEXT,
     "commentId" TEXT,
-    "referenceId" TEXT,
     "supplierId" TEXT,
     "warehouseId" TEXT,
     "categoryId" TEXT,
     "groupArticleId" TEXT,
     "ticketId" TEXT,
-    "stallId" TEXT,
     CONSTRAINT "Article_commentId_fkey" FOREIGN KEY ("commentId") REFERENCES "Comment" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT "Article_referenceId_fkey" FOREIGN KEY ("referenceId") REFERENCES "Reference" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "Article_supplierId_fkey" FOREIGN KEY ("supplierId") REFERENCES "Supplier" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "Article_warehouseId_fkey" FOREIGN KEY ("warehouseId") REFERENCES "Warehouse" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "Article_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "Article_groupArticleId_fkey" FOREIGN KEY ("groupArticleId") REFERENCES "GroupArticle" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT "Article_ticketId_fkey" FOREIGN KEY ("ticketId") REFERENCES "Ticket" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT "Article_stallId_fkey" FOREIGN KEY ("stallId") REFERENCES "Stall" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    CONSTRAINT "Article_ticketId_fkey" FOREIGN KEY ("ticketId") REFERENCES "Ticket" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateTable
