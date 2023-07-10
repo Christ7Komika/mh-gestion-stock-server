@@ -14,7 +14,7 @@ export class CategoryController {
   }
 
   static async create({ body }: Request, res: Response) {
-    const { name } = body;
+    const { name, reference, description } = body;
     if (!name) {
       return res
         .status(404)
@@ -25,23 +25,25 @@ export class CategoryController {
       await prisma.category.create({
         data: {
           name: name,
+          reference: reference,
+          description: description,
         },
       });
 
-      return res
-        .status(200)
-        .json({ message: "La requête a éte exécuté avec succès." });
+      const suppliers = await prisma.category.findMany();
+      return res.status(200).json(suppliers);
     } catch (e) {
       return res.status(500).json({ message: "Requête invalide", error: e });
     }
   }
   static async update({ body, params }: Request, res: Response) {
     const id: string = params.id;
-    const { name } = body;
-    if (!name) {
-      return res
-        .status(404)
-        .json({ message: "Veuillez inserer le nom de la catégorie." });
+    const { name, reference, description } = body;
+    if (!name && !reference && !description) {
+      return res.status(404).json({
+        message:
+          "Veuillez remplir au moins Un(1) champ avant de vouloir soumettre les informations.",
+      });
     }
 
     const category = await prisma.category.findUnique({ where: { id } });
@@ -57,13 +59,14 @@ export class CategoryController {
           id: id,
         },
         data: {
-          name: name,
+          name: name && name,
+          reference: reference && reference,
+          description: description && description,
         },
       });
 
-      return res
-        .status(200)
-        .json({ message: "La requête a éte exécuté avec succès." });
+      const suppliers = await prisma.category.findMany();
+      return res.status(200).json(suppliers);
     } catch (e) {
       return res.status(500).json({ message: "Requête invalide", error: e });
     }
@@ -72,7 +75,8 @@ export class CategoryController {
     const id: string = params.id;
     try {
       await prisma.category.delete({ where: { id } });
-      return res.status(200).json("La requête a été exécuté avec succès.");
+      const suppliers = await prisma.category.findMany();
+      return res.status(200).json(suppliers);
     } catch (e) {
       return res.status(500).json("La requête a échoué.");
     }

@@ -29,12 +29,7 @@ export class ArticlesController {
           operatingPressure: true,
           diameter: true,
           fluid: true,
-          Reference: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
+          reference: true,
           Supplier: {
             select: {
               id: true,
@@ -54,12 +49,6 @@ export class ArticlesController {
               name: true,
             },
           },
-          Stall: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
         },
       });
       return res.status(200).json(supplier);
@@ -69,6 +58,7 @@ export class ArticlesController {
         .json({ message: "La requête a échoué.", error: e });
     }
   }
+
   static async all(req: Request, res: Response) {
     return res.status(200).json(
       await prisma.article.findMany({
@@ -87,12 +77,7 @@ export class ArticlesController {
           operatingPressure: true,
           diameter: true,
           fluid: true,
-          Reference: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
+          reference: true,
           Supplier: {
             select: {
               id: true,
@@ -107,12 +92,6 @@ export class ArticlesController {
             },
           },
           Category: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          Stall: {
             select: {
               id: true,
               name: true,
@@ -142,31 +121,9 @@ export class ArticlesController {
       supplier,
       warehouse,
       category,
-      stall,
       comment,
     } = body;
     const image = file?.filename ? resolve(file?.path) : null;
-    console.log({
-      name,
-      code,
-      type,
-      designation,
-      quantity,
-      length,
-      purchasePrice,
-      sellingPrice,
-      unitPrice,
-      lotNumber,
-      operatingPressure,
-      diameter,
-      fluid,
-      reference,
-      supplier,
-      warehouse,
-      category,
-      stall,
-      comment,
-    });
     if (!name) {
       return res
         .status(404)
@@ -241,12 +198,11 @@ export class ArticlesController {
             operatingPressure: operatingPressure || null,
             diameter: diameter || null,
             fluid: fluid || null,
+            reference: reference || null,
             commentId: commentData?.id || "",
-            // referenceId: reference,
             // supplierId: supplier,
             // warehouseId: warehouse,
             // categoryId: category,
-            // stallId: stall,
           },
         });
 
@@ -307,7 +263,6 @@ export class ArticlesController {
       supplier,
       warehouse,
       category,
-      stall,
       comment,
     } = body;
     const image = file?.filename ? resolve(file?.path) : null;
@@ -350,11 +305,10 @@ export class ArticlesController {
           diameter: diameter && diameter,
           fluid: fluid && fluid,
           commentId: commentData?.id,
-          // referenceId: reference,
+          reference: reference && reference,
           // supplierId: supplier,
           // warehouseId: warehouse,
           // categoryId: category,
-          // stallId: stall,
         },
       });
       try {
@@ -414,11 +368,9 @@ export class ArticlesController {
               ? `Le fluide a été modifié ${articleData?.fluid} => ${article.fluid}`
               : ""
           }
-          ${article.referenceId ? `Le reference a été modifié ` : ""}
           ${article.supplierId ? `Le fournisseur a été modifié ` : ""}
           ${article.warehouseId ? `L'entrepot a été modifié ` : ""}
           ${article.categoryId ? `La catégorie a été modifié ` : ""}
-          ${article.stallId ? `L'emplacement a été modifié ` : ""}
           `,
           commentId: commentData?.id || "",
         });
@@ -446,13 +398,12 @@ export class ArticlesController {
       lotNumber,
       code,
       supplier,
-      reference,
       warehouse,
-      stall,
       comment,
       purchasePrice,
       sellingPrice,
       unitPrice,
+      reference,
     } = body;
 
     let commentData = null;
@@ -495,11 +446,10 @@ export class ArticlesController {
                 operatingPressure: articleData.operatingPressure,
                 diameter: articleData.diameter,
                 fluid: articleData.fluid,
+                reference: reference && reference,
                 commentId: commentData?.id || "",
-                // referenceId: reference,
                 // supplierId: supplier,
                 // warehouseId: warehouse,
-                // stallId: stall,
               },
             });
 
@@ -557,8 +507,7 @@ export class ArticlesController {
   }
 
   static async removeArticle({ body, file, params }: Request, res: Response) {
-    const { name, quantity, code, warehouse, supplier, reference, comment } =
-      body;
+    const { name, quantity, code, warehouse, supplier, comment } = body;
     let commentData = null;
     if (comment) {
       commentData = await prisma.comment.create({
@@ -574,7 +523,6 @@ export class ArticlesController {
           // AND: {
           // warehouseId: warehouse,
           // supplierId: supplier,
-          // referenceId: reference,
           // },
         },
         take: parseInt(quantity),
@@ -607,6 +555,7 @@ export class ArticlesController {
       });
     }
   }
+
   static async removeLength({ body, file, params }: Request, res: Response) {
     const id: string = params.id;
     const { length, comment } = body;

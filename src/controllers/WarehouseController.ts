@@ -4,15 +4,44 @@ import { prisma } from "../model/prisma";
 export class WarehouseController {
   static async index(req: Request, res: Response) {
     const id: string = req.params.id;
-    return res
-      .status(200)
-      .json(await prisma.warehouse.findUnique({ where: { id } }));
+    return res.status(200).json(
+      await prisma.warehouse.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          articles: {
+            select: {
+              id: true,
+            },
+          },
+          createdAt: true,
+        },
+      })
+    );
   }
+
   static async all(req: Request, res: Response) {
-    return res.status(200).json(await prisma.warehouse.findMany());
+    return res.status(200).json(
+      await prisma.warehouse.findMany({
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          articles: {
+            select: {
+              id: true,
+            },
+          },
+          createdAt: true,
+        },
+      })
+    );
   }
+
   static async create({ body }: Request, res: Response) {
-    const { name } = body;
+    const { name, description } = body;
 
     if (!name) {
       return res
@@ -24,13 +53,25 @@ export class WarehouseController {
       await prisma.warehouse.create({
         data: {
           name: name,
-          stat: 0,
+          description: description,
         },
       });
 
-      return res
-        .status(200)
-        .json({ message: "La requête a éte exécuté avec succès." });
+      const warehouse = await prisma.warehouse.findMany({
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          articles: {
+            select: {
+              id: true,
+            },
+          },
+          createdAt: true,
+        },
+      });
+
+      return res.status(200).json(warehouse);
     } catch (e) {
       return res.status(500).json({ message: "Requête invalide", error: e });
     }
@@ -38,12 +79,12 @@ export class WarehouseController {
 
   static async update({ body, params }: Request, res: Response) {
     const id: string = params.id;
-    const { name } = body;
+    const { name, description } = body;
 
-    if (!name) {
+    if (!name && !description) {
       return res
         .status(404)
-        .json({ message: "Veuillez inserer le nom de le l'entrepot." });
+        .json({ message: "Veuillez remplir au moins un des champs soumis." });
     }
 
     try {
@@ -53,32 +94,54 @@ export class WarehouseController {
         },
         data: {
           name: name,
-          stat: 0,
+          description: description && description,
         },
       });
 
-      return res
-        .status(200)
-        .json({ message: "La requête a éte exécuté avec succès." });
+      const warehouse = await prisma.warehouse.findMany({
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          articles: {
+            select: {
+              id: true,
+            },
+          },
+          createdAt: true,
+        },
+      });
+
+      return res.status(200).json(warehouse);
     } catch (e) {
       return res.status(500).json({ message: "Requête invalide", error: e });
     }
   }
+
   static async destroy({ params }: Request, res: Response) {
     const id: string = params.id;
-    const name: string = params.name;
-    const warehouse = await prisma.warehouse.findUnique({ where: { id } });
-
     try {
-      if (warehouse?.name === name) {
-        await prisma.warehouse.delete({ where: { id } });
-        return res.status(200).json("La requête a été exécuté avec succès.");
-      }
-      return res
-        .status(500)
-        .json({ message: "Le nom insérer ne correspond pas a l'entrepot" });
+      await prisma.warehouse.delete({ where: { id } });
+      const warehouses = await prisma.warehouse.findMany({
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          articles: {
+            select: {
+              id: true,
+            },
+          },
+          createdAt: true,
+        },
+      });
+
+      return res.status(200).json(warehouses);
     } catch (e) {
-      return res.status(500).json("La requête a échoué.");
+      return res.status(500).json({
+        message: "La requête a échoué.",
+        error: e,
+      });
     }
   }
 }
