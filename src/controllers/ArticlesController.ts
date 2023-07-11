@@ -359,7 +359,7 @@ export class ArticlesController {
 
   static async getByGroup({ body, file, params }: Request, res: Response) {}
 
-  static async addArticle({ body, file, params }: Request, res: Response) {
+  static async addArticle({ body, params }: Request, res: Response) {
     const id: string = params.id;
     const {
       quantity,
