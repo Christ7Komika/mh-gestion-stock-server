@@ -48,6 +48,7 @@ model Warehouse {
   name        String    @unique
   description String?
   articles    Article[]
+  createdAt   DateTime  @default(now())
 }
 
 model Comment {
