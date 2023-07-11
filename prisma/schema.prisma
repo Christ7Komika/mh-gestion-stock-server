@@ -52,12 +52,12 @@ model Warehouse {
 }
 
 model Comment {
-  id         String    @id @default(uuid())
-  message    String
-  updatedAt  DateTime  @updatedAt
-  creadtedAt DateTime  @default(now())
-  History    History[]
-  Article    Article[]
+  id        String    @id @default(uuid())
+  message   String
+  updatedAt DateTime  @updatedAt
+  createdAt DateTime  @default(now())
+  History   History[]
+  Article   Article[]
 }
 
 model Article {
@@ -87,6 +87,8 @@ model Article {
   categoryId        String?
   Ticket            Ticket?    @relation(fields: [ticketId], references: [id])
   ticketId          String?
+  updatedAt         DateTime   @updatedAt
+  createdAt         DateTime   @default(now())
 }
 
 model Ticket {

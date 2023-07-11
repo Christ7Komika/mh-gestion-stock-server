@@ -4,6 +4,7 @@ import { resolve } from "path";
 import { unlinkSync } from "fs";
 import { HistoryService } from "../services/HistoryService";
 import { StoreService } from "../services/StoreServices";
+import { Prisma } from "@prisma/client";
 
 const articles = {
   id: true,
@@ -21,6 +22,7 @@ const articles = {
   operatingPressure: true,
   diameter: true,
   fluid: true,
+  reference: true,
   Supplier: {
     select: {
       id: true,
@@ -40,6 +42,7 @@ const articles = {
       name: true,
     },
   },
+  createdAt: true,
 };
 
 export class ArticlesController {
@@ -90,6 +93,7 @@ export class ArticlesController {
       category,
       comment,
     } = body;
+
     const image = file?.filename ? resolve(file?.path) : null;
     if (!name) {
       return res
@@ -103,80 +107,108 @@ export class ArticlesController {
       });
     }
 
-    let commentData = null;
-    let i = parseInt(quantity);
-    while (i) {
-      try {
-        if (comment) {
-          commentData = await prisma.comment.create({
-            data: {
-              message: comment,
-            },
-          });
-        }
+    const isValidSupplier = await prisma.supplier.findUnique({
+      where: { id: supplier },
+    });
+    const isValidCategory = await prisma.category.findUnique({
+      where: { id: category },
+    });
+    const isValidWarehouse = await prisma.warehouse.findUnique({
+      where: { id: warehouse },
+    });
 
-        const article = await prisma.article.create({
-          data: {
-            image: image || "",
-            name: name,
-            code: code,
-            type: type,
-            designation: designation,
-            quantity: parseFloat(quantity),
-            hasLength: hasLength,
-            purchasePrice: purchasePrice,
-            sellingPrice: sellingPrice,
-            unitPrice: unitPrice,
-            lotNumber: lotNumber,
-            operatingPressure: operatingPressure,
-            diameter: diameter,
-            fluid: fluid,
-            commentId: commentData?.id || "",
-            reference: reference,
-            supplierId: supplier,
-            warehouseId: warehouse,
-            categoryId: category,
+    if (!isValidSupplier || !isValidCategory || !isValidWarehouse) {
+      throw new Error("Fournisseur, catégorie ou entrepôt invalide !");
+    } else {
+      console.log("TEST REUSSI");
+    }
+
+    try {
+      const article = await prisma.article.create({
+        data: {
+          image: image,
+          name: name,
+          code: code,
+          type: type,
+          designation: designation,
+          quantity: parseFloat(quantity),
+          hasLength: hasLength === "true" ? true : false,
+          purchasePrice: purchasePrice,
+          sellingPrice: sellingPrice,
+          unitPrice: unitPrice,
+          lotNumber: lotNumber,
+          operatingPressure: operatingPressure,
+          diameter: diameter,
+          fluid: fluid,
+          reference: reference,
+          Comment: {
+            create: {
+              message: comment || "",
+            },
           },
+          Warehouse: {
+            connect: {
+              id: isValidWarehouse.id,
+            },
+          },
+          Category: {
+            connect: {
+              id: isValidCategory.id,
+            },
+          },
+          Supplier: {
+            connect: {
+              id: isValidSupplier.id,
+            },
+          },
+
+          // supplierId: isValidSupplier.id,
+          // warehouseId: isValidWarehouse.id,
+          // categoryId: isValidCategory.id,
+        } as Prisma.ArticleUncheckedCreateInput,
+        include: {
+          Comment: true,
+        },
+      });
+
+      try {
+        await HistoryService.create({
+          state: "Création",
+          type: "Article",
+          message: `Création de l'article ''${article.name}''
+          ${quantity ? "Quantité Ajouté " + quantity : ""}`,
+          commentId: article.commentId || "",
         });
 
         try {
-          await HistoryService.create({
-            state: "Création",
-            type: "Article",
-            message: `Création de l'article ''${article.name}''
-            ${quantity ? "Quantité Ajouté " + quantity : ""}
-            ${length ? "Longeur de l'article ajouté " + length : ""}`,
-            commentId: article.commentId || "",
-          });
-
-          try {
-            await StoreService.inCommingStore(article.id);
-            if (i === 1) {
-              return res
-                .status(200)
-                .json(await prisma.article.findMany({ select: articles }));
-            }
-          } catch (e) {
-            return res.status(500).json({
-              message:
-                "La requête a échoué, impossible de rajouter l'article dans le stock entrant",
-              error: e,
-            });
-          }
+          await StoreService.inCommingStore(article.id);
+          return res
+            .status(200)
+            .json(await prisma.article.findMany({ select: articles }));
         } catch (e) {
+          console.log("La requête a échoué, impossible de créer un article");
+          console.log(e);
           return res.status(500).json({
-            message: "La requête a échoué, impossible de créer l'historique",
+            message:
+              "La requête a échoué, impossible de rajouter l'article dans le stock entrant",
             error: e,
           });
         }
       } catch (e) {
+        console.log("La requête a échoué, impossible de créer un article");
+        console.log(e);
         return res.status(500).json({
-          message: "La requête a échoué, impossible de créer un article",
+          message: "La requête a échoué, impossible de créer l'historique",
           error: e,
         });
       }
-
-      i -= 1;
+    } catch (e) {
+      console.log("La requête a échoué, impossible de créer un article");
+      console.log(e);
+      return res.status(500).json({
+        message: "La requête a échoué, impossible de créer un article",
+        error: e,
+      });
     }
   }
 
