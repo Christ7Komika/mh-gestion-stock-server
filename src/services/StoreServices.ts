@@ -1,11 +1,31 @@
 import { prisma } from "../model/prisma";
 
+export interface InCommingStore {
+  articleId: string;
+  articleName: string;
+  designation: string;
+  quantity: number;
+  hasLength: boolean;
+  messageId?: string;
+}
+
+export interface OutGoingStore {}
+
 export class StoreService {
-  static async inCommingStore(id: string): Promise<boolean> {
+  static async inComingStore(data: InCommingStore): Promise<boolean> {
     try {
       await prisma.inComingStore.create({
         data: {
-          articleId: id,
+          articleId: data.articleId,
+          articleName: data.articleName,
+          designation: data.designation,
+          quantity: parseFloat(data.quantity.toString()),
+          hasLength: data.hasLength,
+          comment: {
+            connect: {
+              id: data.messageId,
+            },
+          },
         },
       });
       return true;

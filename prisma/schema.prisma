@@ -52,12 +52,13 @@ model Warehouse {
 }
 
 model Comment {
-  id        String    @id @default(uuid())
-  message   String
-  updatedAt DateTime  @updatedAt
-  createdAt DateTime  @default(now())
-  History   History[]
-  Article   Article[]
+  id            String          @id @default(uuid())
+  message       String
+  updatedAt     DateTime        @updatedAt
+  createdAt     DateTime        @default(now())
+  History       History[]
+  Article       Article[]
+  inComingStore inComingStore[]
 }
 
 model Article {
@@ -66,9 +67,9 @@ model Article {
   name              String
   code              String?
   type              String?
-  designation       String?
+  designation       String
   quantity          Float
-  hasLength         Boolean?
+  hasLength         Boolean?   @default(false)
   purchasePrice     String?
   reference         String?
   sellingPrice      String?
@@ -122,8 +123,14 @@ model OutGoingStore {
 }
 
 model inComingStore {
-  id        String   @id @default(uuid())
-  articleId String
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid())
+  articleName String
+  designation String
+  quantity    Float
+  hasLength   Boolean
+  comment     Comment  @relation(fields: [commentId], references: [id])
+  articleId   String
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  commentId   String
 }

@@ -11,7 +11,7 @@ app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.use("/image", express.static("./src/upload"));
 app.use(router);
 
 app.on("", () => {
