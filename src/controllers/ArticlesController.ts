@@ -122,6 +122,11 @@ export class ArticlesController {
     }
 
     try {
+      const commentData = await prisma.comment.create({
+        data: {
+          message: comment || "Nouveau(x) article(s) ajouté(s)",
+        },
+      });
       const article = await prisma.article.create({
         data: {
           image: image,
@@ -140,8 +145,8 @@ export class ArticlesController {
           fluid: fluid,
           reference: reference,
           Comment: {
-            create: {
-              message: comment || "Nouveau(x) article(s) ajouté(s)",
+            connect: {
+              id: commentData.id,
             },
           },
           Warehouse: {
@@ -171,7 +176,7 @@ export class ArticlesController {
           type: "Article",
           message: `Création de l'article ''${article.name}''
           ${quantity ? "Quantité Ajouté " + quantity : ""}`,
-          commentId: article.commentId || "",
+          commentId: commentData.id || "",
         });
 
         const inComingStore: InCommingStore = {
@@ -180,7 +185,7 @@ export class ArticlesController {
           quantity: article.quantity,
           designation: article.designation,
           hasLength: article.hasLength as boolean,
-          messageId: article.commentId as string,
+          messageId: commentData.id as string,
         };
 
         try {
@@ -224,83 +229,87 @@ export class ArticlesController {
       diameter,
       fluid,
       reference,
-      supplier,
-      category,
       comment,
     } = body;
     const image = file?.filename ? resolve(file?.path) : null;
 
-    let supplierData = null;
-    let categoryData = null;
-
-    if (supplier) {
-      supplierData = await prisma.supplier.findUnique({
-        where: { id: supplier },
-      });
-      if (!supplierData) {
-        return res
-          .status(400)
-          .json({ message: "L'identifiant du fournisseur est invalide" });
-      }
-    }
-
-    if (category) {
-      categoryData = await prisma.category.findUnique({
-        where: { id: category },
-      });
-      if (!supplierData) {
-        return res
-          .status(400)
-          .json({ message: "L'identifiant de la catégorie est invalide" });
-      }
-    }
+    const data: any = {};
 
     const articleData = await prisma.article.findUnique({ where: { id: id } });
-    const commentData = await prisma.comment.create({
-      data: {
-        message:
-          comment ||
-          `Modification ajouté sur l'article '${articleData?.name}' réalisé.`,
-      },
-    });
 
     try {
       const { image: img } = await prisma.article.findUniqueOrThrow({
         where: { id },
       });
 
-      console.log("image : ", img);
-
-      if (img && existsSync(img)) {
+      if (image && img && existsSync(img)) {
         unlinkSync(img);
       }
+
+      if (image) {
+        data.image = image;
+      }
+      if (name) {
+        data.name = name;
+      }
+      if (code) {
+        data.code = code;
+      }
+      if (type) {
+        data.type = type;
+      }
+      if (designation) {
+        data.designation = designation;
+      }
+      if (purchasePrice) {
+        data.purchasePrice = purchasePrice;
+      }
+
+      if (sellingPrice) {
+        data.sellingPrice = sellingPrice;
+      }
+
+      if (unitPrice) {
+        data.unitPrice = unitPrice;
+      }
+      if (lotNumber) {
+        data.lotNumber = lotNumber;
+      }
+      if (operatingPressure) {
+        data.operatingPressure = operatingPressure;
+      }
+
+      if (diameter) {
+        data.diameter = diameter;
+      }
+
+      if (fluid) {
+        data.fluid = fluid;
+      }
+      if (reference) {
+        data.reference = reference;
+      }
+
       const article = await prisma.article.update({
         where: {
           id: id,
         },
+        data: data,
+      });
+
+      const commentData = await prisma.comment.create({
         data: {
-          image: image && image,
-          name: name && name,
-          code: code && code,
-          type: type && type,
-          designation: designation && designation,
-          purchasePrice: purchasePrice && purchasePrice,
-          sellingPrice: sellingPrice && sellingPrice,
-          unitPrice: unitPrice && unitPrice,
-          lotNumber: lotNumber && lotNumber,
-          operatingPressure: operatingPressure && operatingPressure,
-          diameter: diameter && diameter,
-          fluid: fluid && fluid,
-          reference: reference && reference,
-          Comment: {
-            create: {
-              message: comment || "Nouveau(x) article(s) ajouté(s)",
+          message:
+            comment ||
+            `Modification ajouté sur l'article '${articleData?.name}' réalisé.`,
+          Article: {
+            connect: {
+              id: article.id,
             },
           },
-          supplierId: supplier && supplier,
-          categoryId: category && category,
         },
       });
+
       try {
         await HistoryService.create({
           state: "Modification",
@@ -358,8 +367,6 @@ export class ArticlesController {
               ? `Le fluide a été modifié ${articleData?.fluid} => ${article.fluid}`
               : ""
           }
-          ${article.supplierId ? `Le fournisseur a été modifié ` : ""}
-          ${article.categoryId ? `La catégorie a été modifié ` : ""}
           `,
           commentId: commentData?.id || "",
         });
@@ -378,8 +385,6 @@ export class ArticlesController {
         .json({ message: "La requêtte a échoué", error: e });
     }
   }
-
-  static async getByGroup({ body, file, params }: Request, res: Response) {}
 
   static async addArticle({ body, params }: Request, res: Response) {
     const id: string = params.id;
@@ -507,18 +512,8 @@ export class ArticlesController {
               }`,
               commentId: commentData?.id || "",
             });
-            const inComingStore: InCommingStore = {
-              articleId: article.id,
-              articleName: article.name,
-              quantity: currentQuantity,
-              designation: article.designation,
-              hasLength: article.hasLength as boolean,
-              messageId: commentData.id,
-            };
 
             try {
-              await StoreService.inComingStore(inComingStore);
-
               return res
                 .status(200)
                 .json(await prisma.article.findMany({ select: articles }));
@@ -550,19 +545,51 @@ export class ArticlesController {
     }
   }
 
-  static async moveToStore({ body, file, params }: Request, res: Response) {
+  static async changeStorage({ body, params }: Request, res: Response) {
     const id: string = params.id;
-    const { quantity, length, warehouse } = body;
+    const { warehouse, comment } = body;
 
     try {
       const article = await prisma.article.findUniqueOrThrow({
         where: { id: id },
       });
 
-      await prisma.article.update({
+      const articleData = await prisma.article.update({
         where: { id: id },
-        data: {},
+        data: {
+          warehouseId: warehouse,
+        },
+        include: {
+          Warehouse: {
+            select: {
+              name: true,
+            },
+          },
+        },
       });
+      const commentData = await prisma.comment.create({
+        data: {
+          message:
+            comment ||
+            `Changement de stockage de l'article ${article.name}.
+          ${warehouse} a été changé en ${articleData.Warehouse?.name}
+          `,
+        },
+      });
+      await HistoryService.create({
+        state: "Modification",
+        type: "Article",
+        message: `Article ''${article.name}'' :
+        La zone de stockage ${warehouse} a été changé en ${articleData.Warehouse?.name}
+        `,
+        commentId: commentData?.id || "",
+      });
+
+      return res.status(200).json(
+        await prisma.article.findMany({
+          select: articles,
+        })
+      );
     } catch (e) {
       return res.status(500).json({
         message: "La requette a échoué.",
@@ -570,6 +597,218 @@ export class ArticlesController {
       });
     }
   }
+
+  static async moveToStorage({ body, params }: Request, res: Response) {
+    const id: string = params.id;
+    const { warehouse, quantity, currentQuantity, hasLength, comment } = body;
+
+    try {
+      const article = await prisma.article.findUniqueOrThrow({
+        where: { id: id },
+        select: articles,
+      });
+
+      const warehouseData = await prisma.warehouse.findUniqueOrThrow({
+        where: { id: warehouse },
+      });
+
+      await prisma.article.update({
+        where: { id: id },
+        data: {
+          quantity: parseFloat(currentQuantity),
+        },
+      });
+
+      const commentData = await prisma.comment.create({
+        data: {
+          message:
+            comment ||
+            `Deplacement de  ${
+              hasLength === "true"
+                ? `${quantity} mètre(s) de l'article vers le stockage : ${warehouseData.name}.`
+                : `${quantity} article(s) vers le stockage : ${warehouseData.name}`
+            }.
+          `,
+        },
+      });
+
+      await prisma.article.create({
+        data: {
+          image: article.image || "",
+          name: article.name,
+          code: article.code,
+          type: article.type,
+          designation: article.designation,
+          quantity: parseFloat(quantity),
+          hasLength: hasLength === "true" ? true : false,
+          purchasePrice: article.purchasePrice,
+          sellingPrice: article.sellingPrice,
+          unitPrice: article.unitPrice,
+          lotNumber: article.lotNumber,
+          operatingPressure: article.operatingPressure,
+          diameter: article.diameter,
+          fluid: article.fluid,
+          reference: article.reference,
+          Comment: {
+            connect: {
+              id: commentData.id,
+            },
+          },
+          Warehouse: {
+            connect: {
+              id: warehouse,
+            },
+          },
+          Category: {
+            connect: {
+              id: article.Category?.id,
+            },
+          },
+          Supplier: {
+            connect: {
+              id: article.Supplier?.id,
+            },
+          },
+        } as Prisma.ArticleUncheckedCreateInput,
+        include: {
+          Comment: true,
+        },
+      });
+
+      await HistoryService.create({
+        state: "Modification",
+        type: "Article",
+        message: `Article ''${article.name}'' :
+        Déplacement d'une quantité de cet article vers un autre stockage
+        `,
+        commentId: commentData?.id || "",
+      });
+
+      return res.status(200).json(
+        await prisma.article.findMany({
+          select: articles,
+        })
+      );
+    } catch (e) {
+      return res.status(500).json({
+        message: "La requette a échoué.",
+        error: e,
+      });
+    }
+  }
+
+  static async changeSupplier({ body, params }: Request, res: Response) {
+    const id: string = params.id;
+    const { supplier, comment } = body;
+
+    try {
+      const article = await prisma.article.findUniqueOrThrow({
+        where: { id: id },
+      });
+
+      const articleData = await prisma.article.update({
+        where: { id: id },
+        data: {
+          supplierId: supplier,
+        },
+        include: {
+          Supplier: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+      const commentData = await prisma.comment.create({
+        data: {
+          message:
+            comment ||
+            `Changement du fournisseur de l'article ${article.name}.
+          ${supplier} a été changé en ${articleData.Supplier?.name}
+          `,
+        },
+      });
+      await HistoryService.create({
+        state: "Modification",
+        type: "Article",
+        message: `Article ''${article.name}'' :
+        Le fournisseur ${supplier} a été changé en ${articleData.Supplier?.name}
+        `,
+        commentId: commentData?.id || "",
+      });
+
+      return res.status(200).json(
+        await prisma.article.findMany({
+          select: articles,
+        })
+      );
+    } catch (e) {
+      return res.status(500).json({
+        message: "La requette a échoué.",
+        error: e,
+      });
+    }
+  }
+
+  static async changeCategorie({ body, file, params }: Request, res: Response) {
+    const id: string = params.id;
+    const { category, comment } = body;
+
+    try {
+      const article = await prisma.article.findUniqueOrThrow({
+        where: { id: id },
+      });
+
+      const articleData = await prisma.article.update({
+        where: { id: id },
+        data: {
+          categoryId: category,
+        },
+        include: {
+          Category: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+      const commentData = await prisma.comment.create({
+        data: {
+          message:
+            comment ||
+            `Changement de la catégorie de l'article ${article.name}.
+          ${category} a été changé en ${articleData.Category?.name}
+          `,
+        },
+      });
+      await HistoryService.create({
+        state: "Modification",
+        type: "Article",
+        message: `Article ''${article.name}'' :
+        La catégorie ${category} a été changé en ${articleData.Category?.name}
+        `,
+        commentId: commentData?.id || "",
+      });
+
+      return res.status(200).json(
+        await prisma.article.findMany({
+          select: articles,
+        })
+      );
+    } catch (e) {
+      return res.status(500).json({
+        message: "La requette a échoué.",
+        error: e,
+      });
+    }
+  }
+
+  static async moveToAnotherStorage(
+    { body, file, params }: Request,
+    res: Response
+  ) {}
+
+  static async getByGroup({ body, file, params }: Request, res: Response) {}
 
   static async destroy(req: Request, res: Response) {
     const id: string = req.params.id;
