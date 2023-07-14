@@ -213,9 +213,20 @@ export class SupplierController {
       return res.status(200).json(
         await prisma.history.findMany({
           where: {
-            type: "Supplier",
+            createdAt: {
+              gte: new Date(
+                new Date(startDate).getFullYear(),
+                new Date(startDate).getMonth(),
+                new Date(startDate).getDate()
+              ),
+              lt: new Date(
+                new Date(startDate).getFullYear(),
+                new Date(startDate).getMonth(),
+                new Date(startDate).getDate() + 1
+              ),
+            },
             AND: {
-              createdAt: new Date(startDate),
+              type: "Supplier",
             },
           },
           orderBy: {
@@ -238,8 +249,16 @@ export class SupplierController {
             type: "Supplier",
             AND: {
               createdAt: {
-                gte: new Date(startDate),
-                lte: new Date(endDate),
+                gte: new Date(
+                  new Date(startDate).getFullYear(),
+                  new Date(startDate).getMonth(),
+                  new Date(startDate).getDate()
+                ),
+                lte: new Date(
+                  new Date(endDate).getFullYear(),
+                  new Date(endDate).getMonth(),
+                  new Date(endDate).getDate() + 1
+                ),
               },
             },
           },

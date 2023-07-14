@@ -64,7 +64,7 @@ export class ArticlesController {
     }
   }
 
-  static async all(req: Request, res: Response) {
+  static async all(_: Request, res: Response) {
     return res.status(200).json(
       await prisma.article.findMany({
         select: articles,
@@ -750,7 +750,7 @@ export class ArticlesController {
     }
   }
 
-  static async changeCategorie({ body, file, params }: Request, res: Response) {
+  static async changeCategorie({ body, params }: Request, res: Response) {
     const id: string = params.id;
     const { category, comment } = body;
 
@@ -823,6 +823,155 @@ export class ArticlesController {
     } catch (e) {
       return res.status(500).json({ message: "La requête a échoué", error: e });
     }
+  }
+
+  static async getHistory(_: Request, res: Response) {
+    res.status(200).json(
+      await prisma.history.findMany({
+        where: {
+          type: "Article",
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          state: true,
+          type: true,
+          message: true,
+          createdAt: true,
+          comment: {
+            select: {
+              message: true,
+            },
+          },
+        },
+      })
+    );
+  }
+
+  static async filterHistoryByDate({ body }: Request, res: Response) {
+    const { startDate, endDate } = body;
+    if (!startDate && !endDate) {
+      return res
+        .status(400)
+        .json({ message: "Une date doit au moins être envoyé." });
+    }
+    if (startDate && !endDate) {
+      return res.status(200).json(
+        await prisma.history.findMany({
+          where: {
+            createdAt: {
+              gte: new Date(
+                new Date(startDate).getFullYear(),
+                new Date(startDate).getMonth(),
+                new Date(startDate).getDate()
+              ),
+              lt: new Date(
+                new Date(startDate).getFullYear(),
+                new Date(startDate).getMonth(),
+                new Date(startDate).getDate() + 1
+              ),
+            },
+            AND: {
+              type: "Article",
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          select: {
+            id: true,
+            state: true,
+            type: true,
+            message: true,
+            createdAt: true,
+          },
+        })
+      );
+    }
+    if (startDate && endDate) {
+      return res.status(200).json(
+        await prisma.history.findMany({
+          where: {
+            type: "Article",
+            AND: {
+              createdAt: {
+                gte: new Date(
+                  new Date(startDate).getFullYear(),
+                  new Date(startDate).getMonth(),
+                  new Date(startDate).getDate()
+                ),
+                lte: new Date(
+                  new Date(endDate).getFullYear(),
+                  new Date(endDate).getMonth(),
+                  new Date(endDate).getDate() + 1
+                ),
+              },
+            },
+          },
+        })
+      );
+    }
+  }
+
+  static async filter({ body }: Request, res: Response) {
+    const { warehouse, supplier, category, search } = body;
+
+    return res.status(200).json(
+      await prisma.article.findMany({
+        select: articles,
+        where: {
+          OR: [
+            {
+              warehouseId: warehouse,
+            },
+            {
+              supplierId: supplier,
+            },
+            {
+              categoryId: category,
+            },
+
+            {
+              designation: {
+                contains: search,
+              },
+            },
+            {
+              name: {
+                contains: search,
+              },
+            },
+            {
+              code: {
+                contains: search,
+              },
+            },
+            {
+              reference: {
+                contains: search,
+              },
+            },
+            {
+              diameter: {
+                contains: search,
+              },
+            },
+            {
+              operatingPressure: {
+                contains: search,
+              },
+            },
+            {
+              lotNumber: {
+                contains: search,
+              },
+            },
+          ],
+        },
+      })
+    );
   }
 }
 

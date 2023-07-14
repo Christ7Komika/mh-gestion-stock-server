@@ -1,4 +1,5 @@
-Ajouter pays et ville dans la section client
+Ajouter pays et ville dans la section client, fournisseur
+Date d'expiration du flexible
 Categorie
 Ajout du champ total article enregistre, article vendus, article restant
 
