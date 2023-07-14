@@ -12,7 +12,7 @@ router.put("/remove/:id", ArticlesController.removeArticle);
 router.put("/change/storage/:id", ArticlesController.changeStorage);
 router.put("/change/category/:id", ArticlesController.changeCategorie);
 router.put("/change/supplier/:id", ArticlesController.changeSupplier);
-router.put("/move/store/:id", ArticlesController.moveToAnotherStorage);
+router.put("/move/store/:id", ArticlesController.moveToStorage);
 router.delete("/:id", ArticlesController.destroy);
 
 export default router;

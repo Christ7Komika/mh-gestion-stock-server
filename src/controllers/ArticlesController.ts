@@ -803,19 +803,13 @@ export class ArticlesController {
     }
   }
 
-  static async moveToAnotherStorage(
-    { body, file, params }: Request,
-    res: Response
-  ) {}
-
   static async getByGroup({ body, file, params }: Request, res: Response) {}
 
   static async destroy(req: Request, res: Response) {
     const id: string = req.params.id;
     try {
       const article = await prisma.article.findUniqueOrThrow({ where: { id } });
-
-      if (article?.image) {
+      if (article?.image && existsSync(article.image)) {
         unlinkSync(article?.image);
       }
       await prisma.article.delete({
