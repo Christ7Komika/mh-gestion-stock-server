@@ -916,61 +916,92 @@ export class ArticlesController {
   }
 
   static async filter({ body }: Request, res: Response) {
-    const { warehouse, supplier, category, search } = body;
+    const { warehouse, supplier, category, search:s } = body;
+
+    let search = ""
+    if(s) {
+      search = s
+    }
+
+    console.log(body)
+    const stores = await prisma.article.findMany({
+      where: {
+        AND: [
+          {
+            OR: [
+              {
+                Warehouse: {
+                  id:{
+                    contains: warehouse || ""
+                  }
+                }
+              },
+              {
+                Supplier : {
+                  id: {
+                    contains: supplier || ""
+
+                  }
+                }
+              },
+              {
+                Category: {
+                  id: {
+                    contains: category || ""
+                  }
+                }
+              }
+            ]
+          },
+          {
+            OR: [
+              {
+                designation: {
+                  contains: search,
+                },
+              },
+              {
+                name: {
+                  contains: search,
+                },
+              },
+              {
+                code: {
+                  contains: search,
+                },
+              },
+              {
+                reference: {
+                  contains: search,
+                },
+              },
+              {
+                diameter: {
+                  contains: search,
+                },
+              },
+              {
+                operatingPressure: {
+                  contains: search,
+                },
+              },
+              {
+                lotNumber: {
+                  contains: search,
+                },
+              },
+            ]
+          }
+
+        ],
+      },
+      select: articles,
+    })
+
+    console.log(stores)
 
     return res.status(200).json(
-      await prisma.article.findMany({
-        select: articles,
-        where: {
-          OR: [
-            {
-              warehouseId: warehouse,
-            },
-            {
-              supplierId: supplier,
-            },
-            {
-              categoryId: category,
-            },
-
-            {
-              designation: {
-                contains: search,
-              },
-            },
-            {
-              name: {
-                contains: search,
-              },
-            },
-            {
-              code: {
-                contains: search,
-              },
-            },
-            {
-              reference: {
-                contains: search,
-              },
-            },
-            {
-              diameter: {
-                contains: search,
-              },
-            },
-            {
-              operatingPressure: {
-                contains: search,
-              },
-            },
-            {
-              lotNumber: {
-                contains: search,
-              },
-            },
-          ],
-        },
-      })
+stores
     );
   }
 }
