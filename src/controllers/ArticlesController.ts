@@ -6,6 +6,20 @@ import { HistoryService } from "../services/HistoryService";
 import { InCommingStore, StoreService } from "../services/StoreServices";
 import { Prisma } from "@prisma/client";
 
+type dataType =
+  | "name"
+  | "code"
+  | "type"
+  | "designation"
+  | "lotNumber"
+  | "operatingPressure"
+  | "diameter"
+  | "fluid"
+  | "reference"
+  | "Supplier"
+  | "Warehouse"
+  | "Category";
+
 const articles = {
   id: true,
   image: true,
@@ -803,8 +817,6 @@ export class ArticlesController {
     }
   }
 
-  static async getByGroup({ body, file, params }: Request, res: Response) {}
-
   static async destroy(req: Request, res: Response) {
     const id: string = req.params.id;
     try {
@@ -916,96 +928,122 @@ export class ArticlesController {
   }
 
   static async filter({ body }: Request, res: Response) {
-    const { warehouse, supplier, category, search:s } = body;
+    const { warehouse, supplier, category, search } = body;
+    try {
+      const where: Prisma.ArticleWhereInput = {};
 
-    let search = ""
-    if(s) {
-      search = s
+      if (search) {
+        where.OR = [
+          { name: { contains: search } },
+          { code: { contains: search } },
+          { type: { contains: search } },
+          { designation: { contains: search } },
+          { reference: { contains: search } },
+          { lotNumber: { contains: search } },
+          { diameter: { contains: search } },
+          { fluid: { contains: search } },
+        ];
+      }
+
+      // Filtrer par warehouseId s'il est fourni
+      if (warehouse) {
+        where.warehouseId = warehouse;
+      }
+
+      // Filtrer par categoryId s'il est fourni
+      if (category) {
+        where.categoryId = category;
+      }
+
+      // Filtrer par supplierId s'il est fourni
+      if (supplier) {
+        where.supplierId = supplier;
+      }
+
+      const articles = await prisma.article.findMany({
+        where,
+        include: {
+          Supplier: true,
+          Warehouse: true,
+          Category: true,
+          Comment: true,
+          Ticket: true,
+        },
+      });
+
+      return res.status(200).json(articles);
+    } catch (error) {
+      console.log(error);
+      return res.status(400).json({
+        message: "Erreur lors de la filtration des articles",
+        error: error,
+      });
     }
+  }
 
-    console.log(body)
-    const stores = await prisma.article.findMany({
-      where: {
-        AND: [
-          {
-            OR: [
-              {
-                Warehouse: {
-                  id:{
-                    contains: warehouse || ""
-                  }
-                }
-              },
-              {
-                Supplier : {
-                  id: {
-                    contains: supplier || ""
+  static async getByGroup({ body }: Request, res: Response) {
+    const { group } = body;
 
-                  }
-                }
-              },
-              {
-                Category: {
-                  id: {
-                    contains: category || ""
-                  }
-                }
-              }
-            ]
-          },
-          {
-            OR: [
-              {
-                designation: {
-                  contains: search,
-                },
-              },
-              {
-                name: {
-                  contains: search,
-                },
-              },
-              {
-                code: {
-                  contains: search,
-                },
-              },
-              {
-                reference: {
-                  contains: search,
-                },
-              },
-              {
-                diameter: {
-                  contains: search,
-                },
-              },
-              {
-                operatingPressure: {
-                  contains: search,
-                },
-              },
-              {
-                lotNumber: {
-                  contains: search,
-                },
-              },
-            ]
-          }
+    const groupBy = group || "name";
 
-        ],
-      },
-      select: articles,
-    })
+    if (groupBy === "categoryId") {
+      const articlesGroupedByCategory = await prisma.article.groupBy({
+        by: ["categoryId"],
+        _count: true,
+      });
 
-    console.log(stores)
+      const result = await Promise.all(
+        articlesGroupedByCategory.map(async (group) => {
+          const categoryId = group.categoryId;
+          const category = await prisma.category.findUnique({
+            where: { id: categoryId as string },
+          });
+          return { category, count: group._count };
+        })
+      );
+      return res.status(200).json(result);
+    } else if (groupBy === "supplierId") {
+      const articlesGroupedBySupplier = await prisma.article.groupBy({
+        by: ["supplierId"],
+        _count: true,
+      });
 
-    return res.status(200).json(
-stores
-    );
+      const result = await Promise.all(
+        articlesGroupedBySupplier.map(async (group) => {
+          const supplierId = group.supplierId;
+          const supplier = await prisma.supplier.findUnique({
+            where: { id: supplierId as string },
+          });
+          return { supplier, count: group._count };
+        })
+      );
+      return res.status(200).json(result);
+    } else if (groupBy === "warehouseId") {
+      const articlesGroupedByWarehouse = await prisma.article.groupBy({
+        by: ["warehouseId"],
+        _count: true,
+      });
+
+      const result = await Promise.all(
+        articlesGroupedByWarehouse.map(async (group) => {
+          const warehouseId = group.warehouseId;
+          const warehouse = await prisma.warehouse.findUnique({
+            where: { id: warehouseId as string },
+          });
+          return { warehouse, count: group._count };
+        })
+      );
+      return res.status(200).json(result);
+    } else {
+      return res.status(200).json(
+        await prisma.article.groupBy({
+          by: [groupBy],
+          _count: true,
+        })
+      );
+    }
   }
 }
 
-// Gerer les groups
 //  Gerer le stock entrant
 // Gerer l'enregistrement dans l'historique
