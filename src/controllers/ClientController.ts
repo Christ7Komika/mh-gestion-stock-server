@@ -20,7 +20,13 @@ export class ClientController {
   }
 
   static async all(req: Request, res: Response) {
-    return res.status(200).json(await prisma.client.findMany());
+    return res.status(200).json(
+      await prisma.client.findMany({
+        orderBy: {
+          createdAt: "desc",
+        },
+      })
+    );
   }
 
   static async create({ body, file }: Request, res: Response) {
@@ -77,7 +83,11 @@ export class ClientController {
         commentId: null,
       });
 
-      const clients = await prisma.client.findMany();
+      const clients = await prisma.client.findMany({
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
       return res.status(200).json(clients);
     } catch (e) {
       return res
@@ -126,7 +136,11 @@ export class ClientController {
         commentId: null,
       });
 
-      const clients = await prisma.client.findMany();
+      const clients = await prisma.client.findMany({
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
       return res.status(200).json(clients);
     } catch (e) {
       return res
@@ -156,7 +170,11 @@ export class ClientController {
         `,
         commentId: null,
       });
-      const clients = await prisma.client.findMany();
+      const clients = await prisma.client.findMany({
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
       return res.status(200).json(clients);
     } catch (e) {
       return res.status(500).json({ message: "La requête a échoué", error: e });
@@ -243,6 +261,9 @@ export class ClientController {
               },
             },
           },
+          orderBy: {
+            createdAt: "desc",
+          },
         })
       );
     }
@@ -266,6 +287,9 @@ export class ClientController {
               },
             },
           ],
+        },
+        orderBy: {
+          createdAt: "desc",
         },
       })
     );

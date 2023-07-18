@@ -38,6 +38,9 @@ export class SupplierController {
           email: true,
           createdAt: true,
         },
+        orderBy: {
+          createdAt: "desc",
+        },
       })
     );
   }
@@ -94,7 +97,11 @@ export class SupplierController {
         commentId: null,
       });
 
-      const suppliers = await prisma.supplier.findMany();
+      const suppliers = await prisma.supplier.findMany({
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
       return res.status(200).json(suppliers);
     } catch (e) {
       return res
@@ -143,7 +150,11 @@ export class SupplierController {
         commentId: null,
       });
 
-      const suppliers = await prisma.supplier.findMany();
+      const suppliers = await prisma.supplier.findMany({
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
       return res.status(200).json(suppliers);
     } catch (e) {
       return res
@@ -151,6 +162,7 @@ export class SupplierController {
         .json({ message: "La requêtte a échoué.", error: e });
     }
   }
+
   static async destroy(req: Request, res: Response) {
     const id: string = req.params.id;
     try {
@@ -173,7 +185,11 @@ export class SupplierController {
         commentId: null,
       });
 
-      const suppliers = await prisma.supplier.findMany();
+      const suppliers = await prisma.supplier.findMany({
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
       return res.status(200).json(suppliers);
     } catch (e) {
       return res
@@ -262,6 +278,9 @@ export class SupplierController {
               },
             },
           },
+          orderBy: {
+            createdAt: "desc",
+          },
         })
       );
     }
@@ -269,13 +288,15 @@ export class SupplierController {
 
   static async searchSuppliers(req: Request, res: Response) {
     const { search } = req.body;
-
     return res.status(200).json(
       await prisma.supplier.findMany({
         where: {
           name: {
             contains: search,
           },
+        },
+        orderBy: {
+          createdAt: "desc",
         },
       })
     );

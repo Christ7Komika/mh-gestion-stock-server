@@ -10,7 +10,13 @@ export class CategoryController {
   }
 
   static async all(req: Request, res: Response) {
-    return res.status(200).json(await prisma.category.findMany());
+    return res.status(200).json(
+      await prisma.category.findMany({
+        orderBy: {
+          createdAt: "desc",
+        },
+      })
+    );
   }
 
   static async create({ body }: Request, res: Response) {
@@ -30,7 +36,11 @@ export class CategoryController {
         },
       });
 
-      const suppliers = await prisma.category.findMany();
+      const suppliers = await prisma.category.findMany({
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
       return res.status(200).json(suppliers);
     } catch (e) {
       return res.status(500).json({ message: "Requête invalide", error: e });
@@ -65,7 +75,11 @@ export class CategoryController {
         },
       });
 
-      const suppliers = await prisma.category.findMany();
+      const suppliers = await prisma.category.findMany({
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
       return res.status(200).json(suppliers);
     } catch (e) {
       return res.status(500).json({ message: "Requête invalide", error: e });
@@ -75,7 +89,11 @@ export class CategoryController {
     const id: string = params.id;
     try {
       await prisma.category.delete({ where: { id } });
-      const suppliers = await prisma.category.findMany();
+      const suppliers = await prisma.category.findMany({
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
       return res.status(200).json(suppliers);
     } catch (e) {
       return res.status(500).json("La requête a échoué.");

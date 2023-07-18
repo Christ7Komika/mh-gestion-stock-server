@@ -36,6 +36,9 @@ export class WarehouseController {
           },
           createdAt: true,
         },
+        orderBy: {
+          createdAt: "desc",
+        },
       })
     );
   }
@@ -68,6 +71,9 @@ export class WarehouseController {
             },
           },
           createdAt: true,
+        },
+        orderBy: {
+          createdAt: "desc",
         },
       });
 
@@ -110,6 +116,9 @@ export class WarehouseController {
           },
           createdAt: true,
         },
+        orderBy: {
+          createdAt: "desc",
+        },
       });
 
       return res.status(200).json(warehouse);
@@ -133,6 +142,9 @@ export class WarehouseController {
             },
           },
           createdAt: true,
+        },
+        orderBy: {
+          createdAt: "desc",
         },
       });
 

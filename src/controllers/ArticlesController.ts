@@ -16,9 +16,9 @@ type dataType =
   | "diameter"
   | "fluid"
   | "reference"
-  | "Supplier"
-  | "Warehouse"
-  | "Category";
+  | "supplierId"
+  | "warehouseId"
+  | "categoryId";
 
 const articles = {
   id: true,
@@ -82,6 +82,9 @@ export class ArticlesController {
     return res.status(200).json(
       await prisma.article.findMany({
         select: articles,
+        orderBy: {
+          createdAt: "desc",
+        },
       })
     );
   }
@@ -145,8 +148,8 @@ export class ArticlesController {
         data: {
           image: image,
           name: name,
-          code: code,
-          type: type,
+          code: code || "Aucun",
+          type: type || "Aucun",
           designation: designation,
           quantity: parseFloat(quantity),
           hasLength: hasLength === "true" ? true : false,
@@ -157,7 +160,7 @@ export class ArticlesController {
           operatingPressure: operatingPressure,
           diameter: diameter,
           fluid: fluid,
-          reference: reference,
+          reference: reference || "Aucun",
           Comment: {
             connect: {
               id: commentData.id,
@@ -204,9 +207,14 @@ export class ArticlesController {
 
         try {
           await StoreService.inComingStore(inComingStore);
-          return res
-            .status(200)
-            .json(await prisma.article.findMany({ select: articles }));
+          return res.status(200).json(
+            await prisma.article.findMany({
+              select: articles,
+              orderBy: {
+                createdAt: "desc",
+              },
+            })
+          );
         } catch (e) {
           return res.status(500).json({
             message:
@@ -384,9 +392,14 @@ export class ArticlesController {
           `,
           commentId: commentData?.id || "",
         });
-        return res
-          .status(200)
-          .json(await prisma.article.findMany({ select: articles }));
+        return res.status(200).json(
+          await prisma.article.findMany({
+            select: articles,
+            orderBy: {
+              createdAt: "desc",
+            },
+          })
+        );
       } catch (e) {
         return res.status(500).json({
           message: "La requête a échoué, impossible de créer l'historique",
@@ -453,9 +466,14 @@ export class ArticlesController {
 
             try {
               await StoreService.inComingStore(inComingStore);
-              return res
-                .status(200)
-                .json(await prisma.article.findMany({ select: articles }));
+              return res.status(200).json(
+                await prisma.article.findMany({
+                  select: articles,
+                  orderBy: {
+                    createdAt: "desc",
+                  },
+                })
+              );
             } catch (e) {
               return res.status(500).json({
                 message:
@@ -528,9 +546,14 @@ export class ArticlesController {
             });
 
             try {
-              return res
-                .status(200)
-                .json(await prisma.article.findMany({ select: articles }));
+              return res.status(200).json(
+                await prisma.article.findMany({
+                  select: articles,
+                  orderBy: {
+                    createdAt: "desc",
+                  },
+                })
+              );
             } catch (e) {
               return res.status(500).json({
                 message:
@@ -602,6 +625,9 @@ export class ArticlesController {
       return res.status(200).json(
         await prisma.article.findMany({
           select: articles,
+          orderBy: {
+            createdAt: "desc",
+          },
         })
       );
     } catch (e) {
@@ -701,6 +727,9 @@ export class ArticlesController {
       return res.status(200).json(
         await prisma.article.findMany({
           select: articles,
+          orderBy: {
+            createdAt: "desc",
+          },
         })
       );
     } catch (e) {
@@ -754,6 +783,9 @@ export class ArticlesController {
       return res.status(200).json(
         await prisma.article.findMany({
           select: articles,
+          orderBy: {
+            createdAt: "desc",
+          },
         })
       );
     } catch (e) {
@@ -807,6 +839,9 @@ export class ArticlesController {
       return res.status(200).json(
         await prisma.article.findMany({
           select: articles,
+          orderBy: {
+            createdAt: "desc",
+          },
         })
       );
     } catch (e) {
@@ -829,9 +864,14 @@ export class ArticlesController {
           id: id,
         },
       });
-      return res
-        .status(200)
-        .json(await prisma.article.findMany({ select: articles }));
+      return res.status(200).json(
+        await prisma.article.findMany({
+          select: articles,
+          orderBy: {
+            createdAt: "desc",
+          },
+        })
+      );
     } catch (e) {
       return res.status(500).json({ message: "La requête a échoué", error: e });
     }
@@ -982,9 +1022,8 @@ export class ArticlesController {
   }
 
   static async getByGroup({ body }: Request, res: Response) {
-    const { group } = body;
-
-    const groupBy = group || "name";
+    const { group, search } = body;
+    const groupBy: dataType = group || "name";
 
     if (groupBy === "categoryId") {
       const articlesGroupedByCategory = await prisma.article.groupBy({
@@ -992,53 +1031,192 @@ export class ArticlesController {
         _count: true,
       });
 
-      const result = await Promise.all(
-        articlesGroupedByCategory.map(async (group) => {
-          const categoryId = group.categoryId;
-          const category = await prisma.category.findUnique({
-            where: { id: categoryId as string },
-          });
-          return { category, count: group._count };
-        })
-      );
-      return res.status(200).json(result);
+      if (search) {
+        const result = await Promise.all(
+          articlesGroupedByCategory.map(async (group) => {
+            const categoryId = group.categoryId;
+            const category = await prisma.category.findUnique({
+              where: {
+                id: categoryId as string,
+                name: {
+                  contains: search,
+                },
+              },
+            });
+            return { category, count: group._count };
+          })
+        );
+        return res.status(200).json(result);
+      } else {
+        const result = await Promise.all(
+          articlesGroupedByCategory.map(async (group) => {
+            const categoryId = group.categoryId;
+            const category = await prisma.category.findUnique({
+              where: { id: categoryId as string },
+            });
+            return { category, count: group._count };
+          })
+        );
+        return res.status(200).json(result);
+      }
     } else if (groupBy === "supplierId") {
       const articlesGroupedBySupplier = await prisma.article.groupBy({
         by: ["supplierId"],
         _count: true,
       });
 
-      const result = await Promise.all(
-        articlesGroupedBySupplier.map(async (group) => {
-          const supplierId = group.supplierId;
-          const supplier = await prisma.supplier.findUnique({
-            where: { id: supplierId as string },
-          });
-          return { supplier, count: group._count };
-        })
-      );
-      return res.status(200).json(result);
+      if (search) {
+        const result = await Promise.all(
+          articlesGroupedBySupplier.map(async (group) => {
+            const supplierId = group.supplierId;
+            const supplier = await prisma.supplier.findUnique({
+              where: {
+                id: supplierId as string,
+                AND: {
+                  name: {
+                    contains: search,
+                  },
+                },
+              },
+            });
+            return { supplier, count: group._count };
+          })
+        );
+        return res.status(200).json(result);
+      } else {
+        const result = await Promise.all(
+          articlesGroupedBySupplier.map(async (group) => {
+            const supplierId = group.supplierId;
+            const supplier = await prisma.supplier.findUnique({
+              where: { id: supplierId as string },
+            });
+            return { supplier, count: group._count };
+          })
+        );
+        return res.status(200).json(result);
+      }
     } else if (groupBy === "warehouseId") {
       const articlesGroupedByWarehouse = await prisma.article.groupBy({
         by: ["warehouseId"],
         _count: true,
       });
+      if (search) {
+        const result = await Promise.all(
+          articlesGroupedByWarehouse.map(async (group) => {
+            const warehouseId = group.warehouseId;
+            const warehouse = await prisma.warehouse.findUnique({
+              where: {
+                id: warehouseId as string,
+                AND: {
+                  name: {
+                    contains: search,
+                  },
+                },
+              },
+            });
+            return { warehouse, count: group._count };
+          })
+        );
+        return res.status(200).json(result);
+      } else {
+        const result = await Promise.all(
+          articlesGroupedByWarehouse.map(async (group) => {
+            const warehouseId = group.warehouseId;
+            const warehouse = await prisma.warehouse.findUnique({
+              where: { id: warehouseId as string },
+            });
+            return { warehouse, count: group._count };
+          })
+        );
+        return res.status(200).json(result);
+      }
+    } else {
+      if (search) {
+        return res.status(200).json(
+          await prisma.article.groupBy({
+            by: [groupBy],
+            _count: true,
+            where: {
+              [groupBy]: {
+                contains: search,
+              },
+            },
+          })
+        );
+      } else {
+        return res.status(200).json(
+          await prisma.article.groupBy({
+            by: [groupBy],
+            _count: true,
+          })
+        );
+      }
+    }
+  }
 
-      const result = await Promise.all(
-        articlesGroupedByWarehouse.map(async (group) => {
-          const warehouseId = group.warehouseId;
-          const warehouse = await prisma.warehouse.findUnique({
-            where: { id: warehouseId as string },
-          });
-          return { warehouse, count: group._count };
+  static async getArticlesByName({ body }: Request, res: Response) {
+    const { type, value } = body;
+
+    if (type === "supplier") {
+      return res.status(200).json(
+        await prisma.article.findMany({
+          where: {
+            Supplier: {
+              name: {
+                contains: value,
+              },
+            },
+          },
+          select: articles,
+          orderBy: {
+            createdAt: "desc",
+          },
         })
       );
-      return res.status(200).json(result);
+    } else if (type === "category") {
+      return res.status(200).json(
+        await prisma.article.findMany({
+          where: {
+            Category: {
+              name: {
+                contains: value,
+              },
+            },
+          },
+          select: articles,
+          orderBy: {
+            createdAt: "desc",
+          },
+        })
+      );
+    } else if (type === "warehouse") {
+      return res.status(200).json(
+        await prisma.article.findMany({
+          where: {
+            Warehouse: {
+              name: {
+                contains: value,
+              },
+            },
+          },
+          select: articles,
+          orderBy: {
+            createdAt: "desc",
+          },
+        })
+      );
     } else {
       return res.status(200).json(
-        await prisma.article.groupBy({
-          by: [groupBy],
-          _count: true,
+        await prisma.article.findMany({
+          where: {
+            [type]: {
+              contains: value,
+            },
+          },
+          select: articles,
+          orderBy: {
+            createdAt: "desc",
+          },
         })
       );
     }
