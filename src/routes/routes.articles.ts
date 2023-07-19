@@ -8,6 +8,7 @@ router.get("/", ArticlesController.all);
 router.get("/history/add", ArticlesController.getHistory);
 router.post("/filter/data", ArticlesController.filter);
 router.post("/group", ArticlesController.getByGroup);
+router.post("/search", ArticlesController.searchArticles);
 router.post("/history/filter", ArticlesController.filterHistoryByDate);
 router.post("/", uploadImageFile, ArticlesController.create);
 router.put("/:id", uploadImageFile, ArticlesController.update);

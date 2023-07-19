@@ -1221,6 +1221,38 @@ export class ArticlesController {
       );
     }
   }
+
+  static async searchArticles({ body }: Request, res: Response) {
+    const { search } = body;
+    if (!search) {
+      return res
+        .status(404)
+        .json({ message: "Le champ search ne doit pas etre vide" });
+    }
+
+    return res.status(200).json(
+      await prisma.article.findMany({
+        where: {
+          OR: [
+            {
+              name: {
+                contains: search,
+              },
+            },
+            {
+              designation: {
+                contains: search,
+              },
+            },
+          ],
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: articles,
+      })
+    );
+  }
 }
 
 //  Gerer le stock entrant
