@@ -64,14 +64,14 @@ model Comment {
 }
 
 model Article {
-  id                String     @id @default(uuid())
+  id                String        @id @default(uuid())
   image             String?
   name              String
   code              String?
   type              String?
   designation       String
   quantity          Float
-  hasLength         Boolean?   @default(false)
+  hasLength         Boolean?      @default(false)
   purchasePrice     String?
   reference         String?
   sellingPrice      String?
@@ -81,16 +81,26 @@ model Article {
   diameter          String?
   fluid             String?
   Comment           Comment[]
-  Supplier          Supplier?  @relation(fields: [supplierId], references: [id])
+  Supplier          Supplier?     @relation(fields: [supplierId], references: [id])
   supplierId        String?
-  Warehouse         Warehouse? @relation(fields: [warehouseId], references: [id])
+  Warehouse         Warehouse?    @relation(fields: [warehouseId], references: [id])
   warehouseId       String?
-  Category          Category?  @relation(fields: [categoryId], references: [id])
+  Category          Category?     @relation(fields: [categoryId], references: [id])
   categoryId        String?
-  Ticket            Ticket?    @relation(fields: [ticketId], references: [id])
+  Ticket            Ticket?       @relation(fields: [ticketId], references: [id])
   ticketId          String?
-  updatedAt         DateTime   @updatedAt
-  createdAt         DateTime   @default(now())
+  updatedAt         DateTime      @updatedAt
+  createdAt         DateTime      @default(now())
+  PendingItem       PendingItem[]
+}
+
+model PendingItem {
+  id        String  @id @default(uuid())
+  article   Article @relation(fields: [articleId], references: [id])
+  quantity  String
+  Ticket    Ticket? @relation(fields: [ticketId], references: [id])
+  ticketId  String?
+  articleId String
 }
 
 model Ticket {
@@ -98,7 +108,9 @@ model Ticket {
   name            String
   purchaseOrder   String
   status          String
+  sum             String
   articles        Article[]
+  pendingItem     PendingItem[]
   updatedAt       DateTime       @updatedAt
   createdAt       DateTime       @default(now())
   OutGoingStore   OutGoingStore? @relation(fields: [outGoingStoreId], references: [id])
