@@ -80,11 +80,22 @@ CREATE TABLE "Article" (
 );
 
 -- CreateTable
+CREATE TABLE "Item" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "quantity" TEXT NOT NULL,
+    "ticketId" TEXT,
+    "articleId" TEXT NOT NULL,
+    CONSTRAINT "Item_articleId_fkey" FOREIGN KEY ("articleId") REFERENCES "Article" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Item_ticketId_fkey" FOREIGN KEY ("ticketId") REFERENCES "Ticket" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- CreateTable
 CREATE TABLE "Ticket" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "purchaseOrder" TEXT NOT NULL,
     "status" TEXT NOT NULL,
+    "sum" TEXT NOT NULL,
     "updatedAt" DATETIME NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "outGoingStoreId" TEXT,
