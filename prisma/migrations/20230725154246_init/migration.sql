@@ -82,7 +82,9 @@ CREATE TABLE "Article" (
 -- CreateTable
 CREATE TABLE "Item" (
     "id" TEXT NOT NULL PRIMARY KEY,
+    "sumValue" TEXT,
     "quantity" TEXT NOT NULL,
+    "hasLength" BOOLEAN,
     "ticketId" TEXT,
     "articleId" TEXT NOT NULL,
     CONSTRAINT "Item_articleId_fkey" FOREIGN KEY ("articleId") REFERENCES "Article" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -96,6 +98,8 @@ CREATE TABLE "Ticket" (
     "purchaseOrder" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "sum" TEXT NOT NULL,
+    "applicant" TEXT,
+    "discount" TEXT,
     "updatedAt" DATETIME NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "outGoingStoreId" TEXT,
@@ -128,6 +132,7 @@ CREATE TABLE "inComingStore" (
     "designation" TEXT NOT NULL,
     "quantity" REAL NOT NULL,
     "hasLength" BOOLEAN NOT NULL,
+    "purchasePrice" TEXT,
     "articleId" TEXT NOT NULL,
     "updatedAt" DATETIME NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -140,12 +145,6 @@ CREATE UNIQUE INDEX "Client_phone_key" ON "Client"("phone");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Client_email_key" ON "Client"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Supplier_phone_key" ON "Supplier"("phone");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Supplier_email_key" ON "Supplier"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Warehouse_name_key" ON "Warehouse"("name");

@@ -55,28 +55,6 @@ export class SupplierController {
         .json({ message: "Veuillez inserer le nom du fournisseur" });
     }
 
-    if (email) {
-      const supplier = await prisma.supplier.findUnique({
-        where: { email: email },
-      });
-      if (supplier) {
-        return res
-          .status(400)
-          .json({ message: "Adresse mail déjà utilisé par un fournisseur " });
-      }
-    }
-
-    if (phone) {
-      const supplier = await prisma.supplier.findUnique({
-        where: { phone: phone },
-      });
-      if (supplier) {
-        return res.status(400).json({
-          message: "Numéro de téléphone déjà utilisé par un fournisseur ",
-        });
-      }
-    }
-
     try {
       const supplier = await prisma.supplier.create({
         data: {

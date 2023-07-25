@@ -200,6 +200,7 @@ export class ArticlesController {
           articleId: article.id,
           articleName: article.name,
           quantity: article.quantity,
+          purchasePrice: article.purchasePrice,
           designation: article.designation,
           hasLength: article.hasLength as boolean,
           messageId: commentData.id as string,

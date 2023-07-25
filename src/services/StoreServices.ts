@@ -4,12 +4,11 @@ export interface InCommingStore {
   articleId: string;
   articleName: string;
   designation: string;
+  purchasePrice?: string | null;
   quantity: number;
   hasLength: boolean;
   messageId?: string;
 }
-
-export interface OutGoingStore {}
 
 export class StoreService {
   static async inComingStore(data: InCommingStore): Promise<boolean> {
@@ -33,5 +32,4 @@ export class StoreService {
       return false;
     }
   }
-  static async outGoingStore() {}
 }

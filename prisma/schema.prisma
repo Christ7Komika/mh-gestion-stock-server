@@ -28,8 +28,8 @@ model Supplier {
   id        String    @id @default(uuid())
   logo      String?
   name      String
-  phone     String?   @unique
-  email     String?   @unique
+  phone     String?
+  email     String?
   articles  Article[]
   updatedAt DateTime  @updatedAt
   createdAt DateTime  @default(now())
@@ -96,9 +96,11 @@ model Article {
 
 model Item {
   id        String   @id @default(uuid())
+  sumValue  String?
   quantity  String
+  hasLength Boolean?
   article   Article? @relation(fields: [articleId], references: [id])
-  Ticket    Ticket?  @relation(fields: [ticketId], references: [id])
+  Ticket    Ticket?  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   ticketId  String?
   articleId String
 }
@@ -109,6 +111,8 @@ model Ticket {
   purchaseOrder   String
   status          String
   sum             String
+  applicant       String?
+  discount        String?
   articles        Article[]
   item            Item[]
   updatedAt       DateTime       @updatedAt
@@ -136,14 +140,15 @@ model OutGoingStore {
 }
 
 model inComingStore {
-  id          String   @id @default(uuid())
-  articleName String
-  designation String
-  quantity    Float
-  hasLength   Boolean
-  comment     Comment  @relation(fields: [commentId], references: [id])
-  articleId   String
-  updatedAt   DateTime @updatedAt
-  createdAt   DateTime @default(now())
-  commentId   String
+  id            String   @id @default(uuid())
+  articleName   String
+  designation   String
+  quantity      Float
+  hasLength     Boolean
+  purchasePrice String?
+  comment       Comment  @relation(fields: [commentId], references: [id])
+  articleId     String
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  commentId     String
 }

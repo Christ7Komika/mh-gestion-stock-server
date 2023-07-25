@@ -1,6 +1,6 @@
 import { prisma } from "../model/prisma";
 
-interface History {
+export interface History {
   state:
     | "Création"
     | "Ajout"
@@ -10,7 +10,7 @@ interface History {
     | "Retrait"
     | "Validation"
     | "Annulation";
-  type: "Article" | "Ticket" | "Client" | "Supplier";
+  type: "Article" | "Bon de sortie" | "Client" | "Supplier" | "Ticket";
   message: string;
   commentId: string | null;
 }
