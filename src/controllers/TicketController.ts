@@ -17,6 +17,7 @@ const tickets = {
       sumValue: true,
       quantity: true,
       hasLength: true,
+      withdraw: true,
       article: {
         select: {
           hasLength: true,
@@ -98,6 +99,7 @@ export class TicketController {
           data: {
             sumValue: sum.toString(),
             hasLength: articles[i].hasLength,
+            withdraw: articles[i].withdraw.toString(),
             quantity: articles[i].quantity.toString(),
             article: {
               connect: {
@@ -108,7 +110,6 @@ export class TicketController {
         });
         items = [...items, data];
       }
-
       // Creer le ticket
       const ticket = await prisma.ticket.create({
         data: {
@@ -172,7 +173,9 @@ export class TicketController {
               id: articles[i].id,
             },
             data: {
-              quantity: parseFloat(ticket.item[i].quantity),
+              quantity: {
+                increment: parseFloat(ticket.item[i].withdraw),
+              },
             },
           });
         }
@@ -264,6 +267,94 @@ export class TicketController {
         message: "La requete a échoué",
         error: e,
       });
+    }
+  }
+
+  static async getHistory(req: Request, res: Response) {
+    res.status(200).json(
+      await prisma.history.findMany({
+        where: {
+          type: "Bon de sortie",
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          state: true,
+          type: true,
+          message: true,
+          createdAt: true,
+        },
+      })
+    );
+  }
+
+  static async filterHistoryByDate({ body }: Request, res: Response) {
+    const { startDate, endDate } = body;
+    if (!startDate && !endDate) {
+      return res
+        .status(400)
+        .json({ message: "Une date doit au moins être envoyé." });
+    }
+    if (startDate && !endDate) {
+      return res.status(200).json(
+        await prisma.history.findMany({
+          where: {
+            createdAt: {
+              gte: new Date(
+                new Date(startDate).getFullYear(),
+                new Date(startDate).getMonth(),
+                new Date(startDate).getDate()
+              ),
+              lt: new Date(
+                new Date(startDate).getFullYear(),
+                new Date(startDate).getMonth(),
+                new Date(startDate).getDate() + 1
+              ),
+            },
+            AND: {
+              type: "Bon de sortie",
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          select: {
+            id: true,
+            state: true,
+            type: true,
+            message: true,
+            createdAt: true,
+          },
+        })
+      );
+    }
+    if (startDate && endDate) {
+      return res.status(200).json(
+        await prisma.history.findMany({
+          where: {
+            type: "Bon de sortie",
+            AND: {
+              createdAt: {
+                gte: new Date(
+                  new Date(startDate).getFullYear(),
+                  new Date(startDate).getMonth(),
+                  new Date(startDate).getDate()
+                ),
+                lte: new Date(
+                  new Date(endDate).getFullYear(),
+                  new Date(endDate).getMonth(),
+                  new Date(endDate).getDate() + 1
+                ),
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        })
+      );
     }
   }
 }

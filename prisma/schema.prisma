@@ -87,7 +87,7 @@ model Article {
   warehouseId       String?
   Category          Category?  @relation(fields: [categoryId], references: [id])
   categoryId        String?
-  Ticket            Ticket?    @relation(fields: [ticketId], references: [id])
+  Ticket            Ticket[]
   ticketId          String?
   updatedAt         DateTime   @updatedAt
   createdAt         DateTime   @default(now())
@@ -98,6 +98,7 @@ model Item {
   id        String   @id @default(uuid())
   sumValue  String?
   quantity  String
+  withdraw  String
   hasLength Boolean?
   article   Article? @relation(fields: [articleId], references: [id])
   Ticket    Ticket?  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
@@ -151,4 +152,9 @@ model inComingStore {
   updatedAt     DateTime @updatedAt
   createdAt     DateTime @default(now())
   commentId     String
+}
+
+model Security {
+  id       String @id @default(uuid())
+  password String @unique
 }
