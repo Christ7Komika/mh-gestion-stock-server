@@ -100,7 +100,7 @@ export class ClientController {
     const id: string = params.id;
     const { name, company, phone, email } = body;
     const logo = file?.filename ? resolve(file?.path) : null;
-
+    const data: any = {};
     try {
       let clientData = null;
       clientData = await prisma.client.findUnique({ where: { id: id } });
@@ -108,16 +108,27 @@ export class ClientController {
         if (clientData && clientData.logo) {
           unlinkSync(clientData?.logo);
         }
+        data.logo = logo;
+      }
+
+      if (name) {
+        data.name = name;
+      }
+
+      if (company) {
+        data.company = company;
+      }
+
+      if (phone) {
+        data.phone = phone;
+      }
+
+      if (email) {
+        data.email = email;
       }
       const client = await prisma.client.update({
         where: { id: id },
-        data: {
-          logo: logo && logo,
-          name: name && name,
-          company: company && company,
-          phone: phone && phone,
-          email: email && email,
-        },
+        data: data,
       });
 
       await HistoryService.create({
@@ -143,7 +154,9 @@ export class ClientController {
       });
       return res.status(200).json(clients);
     } catch (e) {
+      console.log(e);
       return res
+
         .status(500)
         .json({ message: "La requêtte a échoué", error: e });
     }

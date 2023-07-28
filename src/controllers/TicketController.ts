@@ -50,6 +50,7 @@ export class TicketController {
       })
     );
   }
+
   static async all(req: Request, res: Response) {
     return res.status(200).json(
       await prisma.ticket.findMany({
@@ -63,11 +64,27 @@ export class TicketController {
 
   static async getByStatus({ body }: Request, res: Response) {
     const { status } = body;
-    return res.status(200).json(
-      await prisma.ticket.findMany({
-        where: { status: status },
-      })
-    );
+
+    if (status === "all") {
+      return res.status(200).json(
+        await prisma.ticket.findMany({
+          select: tickets,
+          orderBy: {
+            createdAt: "desc",
+          },
+        })
+      );
+    } else {
+      return res.status(200).json(
+        await prisma.ticket.findMany({
+          where: { status: status },
+          select: tickets,
+          orderBy: {
+            createdAt: "desc",
+          },
+        })
+      );
+    }
   }
 
   static async filterByDate(req: Request, res: Response) {}
@@ -191,7 +208,7 @@ export class TicketController {
       });
 
       const data: History = {
-        state: "Création",
+        state: "Annulation",
         type: "Bon de sortie",
         message: `Vous avez annulé le bon de sortie ''${ticketRes.name}'' pour le bon de commande nº ${ticketRes.purchaseOrder}: statut en annulé. `,
         commentId: null,
@@ -230,6 +247,14 @@ export class TicketController {
           },
         },
       });
+
+      const data: History = {
+        state: "Validation",
+        type: "Bon de sortie",
+        message: `Vous avez annulé le bon de sortie ''${ticket.name}'' pour le bon de commande nº ${ticket.purchaseOrder}: statut en annulé. `,
+        commentId: null,
+      };
+      HistoryService.create(data);
 
       return res.status(200).json(
         await prisma.ticket.findMany({
@@ -356,5 +381,39 @@ export class TicketController {
         })
       );
     }
+  }
+
+  static async searchTickets(req: Request, res: Response) {
+    const { search } = req.body;
+
+    return res.status(200).json(
+      await prisma.ticket.findMany({
+        where: {
+          OR: [
+            {
+              name: {
+                contains: search,
+              },
+            },
+            {
+              purchaseOrder: {
+                contains: search,
+              },
+            },
+            {
+              Client: {
+                name: {
+                  contains: search,
+                },
+              },
+            },
+          ],
+        },
+        select: tickets,
+        orderBy: {
+          createdAt: "desc",
+        },
+      })
+    );
   }
 }

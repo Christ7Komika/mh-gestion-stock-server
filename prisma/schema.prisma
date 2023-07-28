@@ -16,8 +16,8 @@ model Client {
   logo      String?
   name      String
   company   String
-  phone     String?  @unique
-  email     String?  @unique
+  phone     String?
+  email     String?
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
   Ticket    Ticket[]
