@@ -93,15 +93,22 @@ export class WarehouseController {
         .json({ message: "Veuillez remplir au moins un des champs soumis." });
     }
 
+    const data: any = {};
+
+    if (name) {
+      data.name = name;
+    }
+
+    if (description) {
+      data.description = description;
+    }
+
     try {
       await prisma.warehouse.update({
         where: {
           id: id,
         },
-        data: {
-          name: name,
-          description: description && description,
-        },
+        data: data,
       });
 
       const warehouse = await prisma.warehouse.findMany({

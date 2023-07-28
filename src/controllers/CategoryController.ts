@@ -63,16 +63,26 @@ export class CategoryController {
         .json({ message: "Aucune catégorie n'a été trouvé." });
     }
 
+    const data: any = {};
+
+    if (name) {
+      data.name = name;
+    }
+
+    if (reference) {
+      data.reference = reference;
+    }
+
+    if (description) {
+      data.description = description;
+    }
+
     try {
       await prisma.category.update({
         where: {
           id: id,
         },
-        data: {
-          name: name && name,
-          reference: reference && reference,
-          description: description && description,
-        },
+        data: data,
       });
 
       const suppliers = await prisma.category.findMany({

@@ -1254,7 +1254,58 @@ export class ArticlesController {
       })
     );
   }
-}
 
-//  Gerer le stock entrant
-// Gerer l'enregistrement dans l'historique
+  static async notification(_: Request, res: Response) {
+    return res.status(200).json(
+      await prisma.article.findMany({
+        where: {
+          quantity: {
+            lte: 15,
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          _count: true,
+          name: true,
+          designation: true,
+          hasLength: true,
+          quantity: true,
+          Warehouse: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      })
+    );
+  }
+  static async warning(_: Request, res: Response) {
+    return res.status(200).json(
+      await prisma.article.findMany({
+        where: {
+          quantity: {
+            lte: 5,
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          _count: true,
+          name: true,
+          designation: true,
+          hasLength: true,
+          quantity: true,
+          Warehouse: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      })
+    );
+  }
+}

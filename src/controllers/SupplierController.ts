@@ -4,6 +4,15 @@ import { resolve } from "path";
 import { unlinkSync } from "fs";
 import { HistoryService } from "../services/HistoryService";
 
+const suppliersData = {
+  id: true,
+  logo: true,
+  name: true,
+  phone: true,
+  email: true,
+  createdAt: true,
+};
+
 export class SupplierController {
   static async index(req: Request, res: Response) {
     const id: string = req.params.id;
@@ -12,13 +21,7 @@ export class SupplierController {
         where: {
           id: id,
         },
-        select: {
-          id: true,
-          name: true,
-          phone: true,
-          email: true,
-          createdAt: true,
-        },
+        select: suppliersData,
       });
       return res.status(200).json(supplier);
     } catch (e) {
@@ -31,13 +34,7 @@ export class SupplierController {
   static async all(req: Request, res: Response) {
     return res.status(200).json(
       await prisma.supplier.findMany({
-        select: {
-          id: true,
-          name: true,
-          phone: true,
-          email: true,
-          createdAt: true,
-        },
+        select: suppliersData,
         orderBy: {
           createdAt: "desc",
         },
@@ -76,6 +73,7 @@ export class SupplierController {
       });
 
       const suppliers = await prisma.supplier.findMany({
+        select: suppliersData,
         orderBy: {
           createdAt: "desc",
         },
@@ -93,11 +91,25 @@ export class SupplierController {
     const { name, phone, email } = body;
     const logo = file?.filename ? resolve(file?.path) : null;
 
+    const data: any = {};
     const supplier = await prisma.supplier.findUnique({ where: { id: id } });
     if (logo) {
       if (supplier && supplier.logo) {
         unlinkSync(supplier.logo);
       }
+      data.logo = logo;
+    }
+
+    if (name) {
+      data.name = name;
+    }
+
+    if (phone) {
+      data.phone = phone;
+    }
+
+    if (email) {
+      data.email = email;
     }
 
     try {
@@ -105,12 +117,7 @@ export class SupplierController {
         where: {
           id: id,
         },
-        data: {
-          logo: logo && logo,
-          name: name && name,
-          phone: phone && phone,
-          email: email && email,
-        },
+        data: data,
       });
 
       await HistoryService.create({
@@ -129,6 +136,7 @@ export class SupplierController {
       });
 
       const suppliers = await prisma.supplier.findMany({
+        select: suppliersData,
         orderBy: {
           createdAt: "desc",
         },
@@ -164,6 +172,7 @@ export class SupplierController {
       });
 
       const suppliers = await prisma.supplier.findMany({
+        select: suppliersData,
         orderBy: {
           createdAt: "desc",
         },
@@ -273,6 +282,7 @@ export class SupplierController {
             contains: search,
           },
         },
+        select: suppliersData,
         orderBy: {
           createdAt: "desc",
         },

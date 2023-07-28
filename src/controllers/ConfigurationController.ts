@@ -28,6 +28,27 @@ export class ConfigurationController {
       return res.status(500).json({ message: "La requete a échoué", error: e });
     }
   }
+
+  static async reset(_: Request, res: Response) {
+    const hash = bcrypt.hashSync("MH-2023", 10);
+    try {
+      await prisma.security.create({
+        data: {
+          password: hash,
+        },
+      });
+      return res.status(200).json(
+        (
+          await prisma.security.findMany({
+            take: 1,
+          })
+        )[0]
+      );
+    } catch (e) {
+      return res.status(500).json({ message: "La requete a échoué", error: e });
+    }
+  }
+
   static async get(_: Request, res: Response) {
     try {
       return res.status(200).json(

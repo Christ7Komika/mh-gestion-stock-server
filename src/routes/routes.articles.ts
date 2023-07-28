@@ -18,6 +18,8 @@ router.put("/change/storage/:id", ArticlesController.changeStorage);
 router.put("/change/category/:id", ArticlesController.changeCategorie);
 router.put("/change/supplier/:id", ArticlesController.changeSupplier);
 router.put("/move/store/:id", ArticlesController.moveToStorage);
+router.get("/notification", ArticlesController.notification);
+router.get("/warning", ArticlesController.warning);
 router.delete("/:id", ArticlesController.destroy);
 
 export default router;

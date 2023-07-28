@@ -4,6 +4,7 @@ const router = Router();
 
 router.get("/init", ConfigurationController.init);
 router.get("/", ConfigurationController.get);
-router.get("/change", ConfigurationController.change);
+router.post("/change", ConfigurationController.change);
+router.get("/reset", ConfigurationController.reset);
 
 export default router;
