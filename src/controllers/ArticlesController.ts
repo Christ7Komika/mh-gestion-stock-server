@@ -192,7 +192,11 @@ export class ArticlesController {
           state: "Création",
           type: "Article",
           message: `Création de l'article ''${article.name}''
-          ${quantity ? "Quantité Ajouté " + quantity : ""}`,
+          ${
+            article.hasLength
+              ? "Quantité Ajouté " + quantity + " mètre(s)"
+              : quantity
+          }`,
           commentId: commentData.id || "",
         });
 
@@ -1260,6 +1264,7 @@ export class ArticlesController {
       await prisma.article.findMany({
         where: {
           quantity: {
+            gt: 5,
             lte: 15,
           },
         },
@@ -1269,9 +1274,15 @@ export class ArticlesController {
         select: {
           _count: true,
           name: true,
+          code: true,
           designation: true,
           hasLength: true,
           quantity: true,
+          Supplier: {
+            select: {
+              name: true,
+            },
+          },
           Warehouse: {
             select: {
               name: true,
@@ -1294,11 +1305,17 @@ export class ArticlesController {
         },
         select: {
           id: true,
+          code: true,
           _count: true,
           name: true,
           designation: true,
           hasLength: true,
           quantity: true,
+          Supplier: {
+            select: {
+              name: true,
+            },
+          },
           Warehouse: {
             select: {
               name: true,

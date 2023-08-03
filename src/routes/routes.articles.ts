@@ -5,6 +5,8 @@ const router = Router();
 
 router.get("/:id", ArticlesController.index);
 router.get("/", ArticlesController.all);
+router.get("/get/notification", ArticlesController.notification);
+router.get("/get/warning", ArticlesController.warning);
 router.get("/history/add", ArticlesController.getHistory);
 router.post("/filter/data", ArticlesController.filter);
 router.post("/group", ArticlesController.getByGroup);
@@ -18,8 +20,7 @@ router.put("/change/storage/:id", ArticlesController.changeStorage);
 router.put("/change/category/:id", ArticlesController.changeCategorie);
 router.put("/change/supplier/:id", ArticlesController.changeSupplier);
 router.put("/move/store/:id", ArticlesController.moveToStorage);
-router.get("/notification", ArticlesController.notification);
-router.get("/warning", ArticlesController.warning);
+
 router.delete("/:id", ArticlesController.destroy);
 
 export default router;

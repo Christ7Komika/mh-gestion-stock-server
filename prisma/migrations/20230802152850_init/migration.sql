@@ -155,12 +155,6 @@ CREATE TABLE "_ArticleToTicket" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Client_phone_key" ON "Client"("phone");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Client_email_key" ON "Client"("email");
-
--- CreateIndex
 CREATE UNIQUE INDEX "Warehouse_name_key" ON "Warehouse"("name");
 
 -- CreateIndex

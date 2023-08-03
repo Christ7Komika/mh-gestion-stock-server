@@ -12,6 +12,8 @@ const tickets = {
   sum: true,
   OutGoingStore: true,
   outGoingStoreId: true,
+  applicant: true,
+  discount: true,
   item: {
     select: {
       sumValue: true,

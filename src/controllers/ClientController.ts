@@ -39,28 +39,6 @@ export class ClientController {
         .json({ message: "Veuillez inserer le nom du client" });
     }
 
-    if (email) {
-      const client = await prisma.client.findUnique({
-        where: { email: email },
-      });
-      if (client) {
-        return res
-          .status(400)
-          .json({ message: "Adresse mail déjà utilisé par un client " });
-      }
-    }
-
-    if (phone) {
-      const client = await prisma.client.findUnique({
-        where: { phone: phone },
-      });
-      if (client) {
-        return res
-          .status(400)
-          .json({ message: "Numéro de téléphone déjà utilisé par un client " });
-      }
-    }
-
     try {
       const client = await prisma.client.create({
         data: {
