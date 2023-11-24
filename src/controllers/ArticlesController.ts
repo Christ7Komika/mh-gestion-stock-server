@@ -64,13 +64,223 @@ export class ArticlesController {
     const id: string = req.params.id;
 
     try {
-      const supplier = await prisma.article.findUnique({
+      const article = await prisma.article.findUnique({
         where: {
           id: id,
         },
         select: articles,
       });
-      return res.status(200).json(supplier);
+      return res.status(200).json(article);
+    } catch (e) {
+      return res
+        .status(500)
+        .json({ message: "La requête a échoué.", error: e });
+    }
+  }
+
+  static async getBySupplier(req: Request, res: Response) {
+    const id: string = req.params.id;
+    const step: string = req.params.step;
+    const skip: string = req.params.skip;
+    const search: string = req.params.search;
+
+    try {
+      let articleData: any;
+      let total: number;
+      if (search !== "empty") {
+        articleData = await prisma.article.findMany({
+          where: {
+            supplierId: id,
+            OR: [
+              {
+                designation: {
+                  contains: search,
+                },
+              },
+            ],
+          },
+          skip: parseInt(skip),
+          take: parseInt(step),
+          select: articles,
+          orderBy: {
+            createdAt: "asc",
+          },
+        });
+        total = await prisma.article.count({
+          where: {
+            supplierId: id,
+            OR: [
+              {
+                designation: {
+                  contains: search,
+                },
+              },
+            ],
+          },
+        });
+      } else {
+        articleData = await prisma.article.findMany({
+          where: {
+            supplierId: id,
+          },
+          skip: parseInt(skip),
+          take: parseInt(step),
+          select: articles,
+          orderBy: {
+            createdAt: "asc",
+          },
+        });
+        total = await prisma.article.count({
+          where: {
+            supplierId: id,
+          },
+        });
+      }
+
+      return res.status(200).json({
+        data: articleData,
+        count: total,
+      });
+    } catch (e) {
+      return res
+        .status(500)
+        .json({ message: "La requête a échoué.", error: e });
+    }
+  }
+
+  static async getByCategory(req: Request, res: Response) {
+    const id: string = req.params.id;
+    const step: string = req.params.step;
+    const skip: string = req.params.skip;
+    const search: string = req.params.search;
+
+    try {
+      let articleData: any;
+      let total: number;
+      if (search !== "empty") {
+        articleData = await prisma.article.findMany({
+          where: {
+            categoryId: id,
+            OR: [
+              {
+                designation: {
+                  contains: search,
+                },
+              },
+            ],
+          },
+          skip: parseInt(skip),
+          take: parseInt(step),
+          select: articles,
+          orderBy: {
+            createdAt: "asc",
+          },
+        });
+        total = await prisma.article.count({
+          where: {
+            categoryId: id,
+            OR: [
+              {
+                designation: {
+                  contains: search,
+                },
+              },
+            ],
+          },
+        });
+      } else {
+        articleData = await prisma.article.findMany({
+          where: {
+            categoryId: id,
+          },
+          skip: parseInt(skip),
+          take: parseInt(step),
+          select: articles,
+          orderBy: {
+            createdAt: "asc",
+          },
+        });
+        total = await prisma.article.count({
+          where: {
+            categoryId: id,
+          },
+        });
+      }
+
+      return res.status(200).json({
+        data: articleData,
+        count: total,
+      });
+    } catch (e) {
+      return res
+        .status(500)
+        .json({ message: "La requête a échoué.", error: e });
+    }
+  }
+
+  static async getByWarehouse(req: Request, res: Response) {
+    const id: string = req.params.id;
+    const step: string = req.params.step;
+    const skip: string = req.params.skip;
+    const search: string = req.params.search;
+
+    try {
+      let articleData: any;
+      let total: number;
+      if (search !== "empty") {
+        articleData = await prisma.article.findMany({
+          where: {
+            warehouseId: id,
+            OR: [
+              {
+                designation: {
+                  contains: search,
+                },
+              },
+            ],
+          },
+          skip: parseInt(skip),
+          take: parseInt(step),
+          select: articles,
+          orderBy: {
+            createdAt: "asc",
+          },
+        });
+        total = await prisma.article.count({
+          where: {
+            warehouseId: id,
+            OR: [
+              {
+                designation: {
+                  contains: search,
+                },
+              },
+            ],
+          },
+        });
+      } else {
+        articleData = await prisma.article.findMany({
+          where: {
+            warehouseId: id,
+          },
+          skip: parseInt(skip),
+          take: parseInt(step),
+          select: articles,
+          orderBy: {
+            createdAt: "asc",
+          },
+        });
+        total = await prisma.article.count({
+          where: {
+            warehouseId: id,
+          },
+        });
+      }
+
+      return res.status(200).json({
+        data: articleData,
+        count: total,
+      });
     } catch (e) {
       return res
         .status(500)
@@ -191,11 +401,11 @@ export class ArticlesController {
         await HistoryService.create({
           state: "Création",
           type: "Article",
-          message: `Création de l'article ''${article.name}''
+          message: `Création de l'article ''${article.designation} ''
           ${
             article.hasLength
               ? "Quantité Ajouté " + quantity + " mètre(s)"
-              : quantity
+              : "Quantité Ajouté " + quantity
           }`,
           commentId: commentData.id || "",
         });
@@ -342,7 +552,7 @@ export class ArticlesController {
           state: "Modification",
           type: "Article",
           message: `
-          Modification de l'article ''${article.name}''
+          Modification de l'article ''${article.designation}''
           ${article.image && "L'image a été modifié"}
           ${
             article.code
@@ -1292,6 +1502,7 @@ export class ArticlesController {
       })
     );
   }
+
   static async warning(_: Request, res: Response) {
     return res.status(200).json(
       await prisma.article.findMany({

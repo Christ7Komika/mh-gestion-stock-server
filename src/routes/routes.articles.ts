@@ -4,6 +4,22 @@ import uploadImageFile from "../middlewares/multer";
 const router = Router();
 
 router.get("/:id", ArticlesController.index);
+
+router.get(
+  "/suppliers/:id/:step/:skip/:search",
+  ArticlesController.getBySupplier
+);
+
+router.get(
+  "/categories/:id/:step/:skip/:search",
+  ArticlesController.getByCategory
+);
+
+router.get(
+  "/warehouses/:id/:step/:skip/:search",
+  ArticlesController.getByWarehouse
+);
+
 router.get("/", ArticlesController.all);
 router.get("/get/notification", ArticlesController.notification);
 router.get("/get/warning", ArticlesController.warning);
