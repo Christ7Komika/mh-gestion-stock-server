@@ -18,8 +18,6 @@ app.on("", () => {
   prisma.$disconnect();
 });
 
-console.log("hostname -> ", env.hostname);
-
 app.listen(env.port, () => {
   console.log(`Program starting on ${env.hostname}:${env.port}`);
 });

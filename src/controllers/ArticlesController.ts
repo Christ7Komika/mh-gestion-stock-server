@@ -289,14 +289,16 @@ export class ArticlesController {
   }
 
   static async all(_: Request, res: Response) {
-    return res.status(200).json(
-      await prisma.article.findMany({
-        select: articles,
-        orderBy: {
-          createdAt: "desc",
-        },
-      })
-    );
+    const articlesData = await prisma.article.findMany({
+      select: articles,
+      take: 25,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    const count = await prisma.article.count();
+
+    return res.status(200).json({ data: articlesData, count });
   }
 
   static async create({ body, file }: Request, res: Response) {
@@ -1101,6 +1103,7 @@ export class ArticlesController {
         orderBy: {
           createdAt: "desc",
         },
+        take: 25,
         select: {
           id: true,
           state: true,
@@ -1228,7 +1231,6 @@ export class ArticlesController {
 
       return res.status(200).json(articles);
     } catch (error) {
-      console.log(error);
       return res.status(400).json({
         message: "Erreur lors de la filtration des articles",
         error: error,
