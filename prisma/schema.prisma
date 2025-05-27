@@ -1,0 +1,164 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id        String   @id @default(uuid())
+  logo      String?
+  name      String
+  company   String
+  phone     String?
+  email     String?
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  Ticket    Ticket[]
+  ticketId  String?
+}
+
+model Supplier {
+  id        String    @id @default(uuid())
+  logo      String?
+  name      String
+  phone     String?
+  email     String?
+  articles  Article[]
+  updatedAt DateTime  @updatedAt
+  createdAt DateTime  @default(now())
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  reference   String?
+  description String?
+  articles    Article[]
+  createdAt   DateTime  @default(now())
+}
+
+model Warehouse {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  articles    Article[]
+  createdAt   DateTime  @default(now())
+}
+
+model Comment {
+  id            String          @id @default(uuid())
+  message       String
+  updatedAt     DateTime        @updatedAt
+  createdAt     DateTime        @default(now())
+  History       History[]
+  inComingStore inComingStore[]
+  Article       Article?        @relation(fields: [articleId], references: [id])
+  articleId     String?
+}
+
+model Article {
+  id                String     @id @default(uuid())
+  image             String?
+  name              String
+  code              String?
+  type              String?
+  expirationDate    DateTime?
+  addDate           DateTime?
+  initialStock      String?
+  outStock          String?
+  designation       String
+  quantity          Float
+  hasLength         Boolean?   @default(false)
+  purchasePrice     String?
+  reference         String?
+  sellingPrice      String?
+  unitPrice         String?
+  lotNumber         String?
+  operatingPressure String?
+  diameter          String?
+  fluid             String?
+  Comment           Comment[]
+  Supplier          Supplier?  @relation(fields: [supplierId], references: [id])
+  supplierId        String?
+  Warehouse         Warehouse? @relation(fields: [warehouseId], references: [id])
+  warehouseId       String?
+  Category          Category?  @relation(fields: [categoryId], references: [id])
+  categoryId        String?
+  Ticket            Ticket[]
+  ticketId          String?
+  updatedAt         DateTime   @updatedAt
+  createdAt         DateTime   @default(now())
+  item              Item[]
+}
+
+model Item {
+  id        String   @id @default(uuid())
+  sumValue  String?
+  quantity  String
+  withdraw  String
+  hasLength Boolean?
+  article   Article? @relation(fields: [articleId], references: [id])
+  Ticket    Ticket?  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticketId  String?
+  articleId String
+}
+
+model Ticket {
+  id              String         @id @default(uuid())
+  name            String
+  purchaseOrder   String
+  status          String
+  sum             String
+  applicant       String?
+  discount        String?
+  articles        Article[]
+  item            Item[]
+  updatedAt       DateTime       @updatedAt
+  createdAt       DateTime       @default(now())
+  OutGoingStore   OutGoingStore? @relation(fields: [outGoingStoreId], references: [id])
+  outGoingStoreId String?
+  Client          Client?        @relation(fields: [clientId], references: [id])
+  clientId        String?
+}
+
+model History {
+  id        String   @id @default(uuid())
+  state     String
+  type      String
+  message   String
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  commentId String?
+}
+
+model OutGoingStore {
+  id      String   @id @default(uuid())
+  tickets Ticket[]
+}
+
+model inComingStore {
+  id            String   @id @default(uuid())
+  articleName   String
+  designation   String
+  quantity      Float
+  hasLength     Boolean
+  purchasePrice String?
+  comment       Comment  @relation(fields: [commentId], references: [id])
+  articleId     String
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  commentId     String
+}
+
+model Security {
+  id       String @id @default(uuid())
+  password String @unique
+}
